@@ -215,6 +215,34 @@ colored_bar_plot = function(data, x, y, title){
 }
 
 
+plotterizer = function(dataframe, x, fill=NA,  pallette=NULL){
+  legend_title=fill
+  print(legend_title)
+  fill=dataframe[[fill]]
+  title1 = short_title(x)
+  subtitle = subtitle_function(x)
+  variable = dataframe[[x]]
+  ggplot(dataframe, aes(Country, variable*100, fill=fill))+
+    geom_col(position = position_dodge(width = 1.2))+
+    coord_flip()+
+    geom_text(aes(label=round(variable*100), hjust = -.5),size=2.6, position = position_dodge(width = .7))+
+    scale_fill_ab(pallette)+theme_bw()+
+    theme(legend.position = "bottom", axis.text.x = element_text(size = 10),
+          plot.caption = element_text(size = 11, hjust = 0),  
+          plot.title = element_text(size=14, hjust=0.5),
+          plot.subtitle = element_text(size = 10, hjust = 0.5, face = "italic"),
+          axis.text.y = element_text(angle = 45, size = 12),
+          text = element_text(family = "Arial"),
+          panel.border = element_rect(colour = "black", fill=NA, size=.6),
+          panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank())+ylim(0,100)+
+    labs(caption = "Notes: Weighted Estimates.\nSource: Arab Barometer, Wave 5", fill=legend_title)+
+    xlab("")+ 
+    ylab("Percent")+ggtitle(title1, subtitle = subtitle)
+  
+}
+
+
 ####Colors
 women_color = '#796391'
 country_color = "#DF6E21"
