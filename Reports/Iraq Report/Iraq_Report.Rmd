@@ -42,7 +42,7 @@ democracy_table =abv%>%
   gather(Question, Percent)%>%
   filter(Percent<1)%>%
   mutate(Question = str_wrap(Question, width = 25))
-democracy_table%>%
+democracy_table
   
 abv_plot = function(dataframe, x, y){
     x= enquo(x)
