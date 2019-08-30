@@ -1,0 +1,1812 @@
+\documentclass[12pt]{article}
+\usepackage[english]{babel}
+\usepackage{tocloft}
+\addtolength{\cftsecnumwidth}{12pt}
+\addtolength{\cftsubsecnumwidth}{12pt}
+\setlength{\cftsubsecindent}{30pt}
+\usepackage{endnotes}
+\usepackage{scrextend}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{url}
+\usepackage{paralist}
+\usepackage{array}
+\newcolumntype{R}[1]{>{\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\usepackage{float}
+\usepackage{authblk}
+\usepackage{tablefootnote}\label{key}
+\usepackage{todonotes}
+\usepackage{lscape}
+\usepackage{chronology}
+\usepackage{mdframed}
+\usepackage{enumitem, amssymb}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{booktabs}
+\usepackage{dcolumn}
+\usepackage[defaultfam,tabular,lining]{montserrat}
+\usepackage{mathpazo}
+\usepackage{xcolor}
+\definecolor{abblue}{RGB}{30,150,186}
+\definecolor{abblueD}{RGB}{44,143,159}
+\definecolor{aborange}{RGB}{223,109,33}
+\usepackage[left=1in,right=1in,top=1in, bottom=1in]{geometry}
+\usepackage{background}
+\usepackage{multicol}
+\usepackage{fancyhdr}
+\usepackage{subfig}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand\headrule{}
+\fancyhead[L]{\color{gray}\footnotesize{Arab Barometer -- Wave V} \\
+	\color{gray}\footnotesize{Topic Report}}
+\cfoot{\color{gray}\footnotesize{www.arabbarometer.org}}
+\rfoot{\color{gray}\footnotesize{ \thepage}}
+\usepackage{tocloft}
+\renewcommand{\cftsubsecfont}{\hypersetup{linkcolor=gray}}
+\usepackage{hyperref}
+\hypersetup{colorlinks=false,pdfborder=0 0 0,citebordercolor={0 0 0}}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+	\newpage
+	\backgroundsetup{
+		scale=1,
+		color=black,
+		opacity=1,
+		angle=0,
+		contents={%
+			\includegraphics[width=\paperwidth,height=\paperheight]{AB_FrontCover.pdf}
+		}%
+	}
+	\newgeometry{left=1in,right=1in,top=1in, bottom=1in}
+	\pagestyle{empty}
+	\vspace*{2in}
+	\begin{center}
+		\color{white}\Large\textbf{Politics and Social Media in the Middle East and North Africa:} \\
+		\color{white}\Large\textit{Trends and Trust in Online Information} \\
+		\vspace*{0.5in}
+		\color{white}\large{August 2019} \\
+		\vspace*{3.25in}
+		\color{white}\large{Jason Wee and Sophie Li} \\
+		\color{white}\large{Princeton University}
+	\end{center}
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\newpage\backgroundsetup{contents={}}
+	\color{gray}
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\color{gray}
+\pagestyle{fancy}
+
+\begin{center}
+	\section*{Politics and Social Media in the Middle East and North Africa: Trends and Trust in Online Information}
+	\subsection*{}
+	Jason Wee and Sophie Li, \\
+	Princeton University
+\end{center}
+
+\section*{Key Findings}
+\begin{itemize}
+  \item Political interest has decreased and plateaued post-Arab Spring in the Middle East and North Africa, possibly due to political fatigue. Moving from 2006-2013 to 2016-2018, citizens reporting interest in politics has decreased by 12 percent. In spite of this, MENA citizens are more informed about political events in their countries relative to their interest in politics. Those with higher education were more likely to be politically informed and interested, but no consistent trend was found across age groups.
+  \item Across MENA, citizens have been consistently finding politics too complicated (74 percent in 2018). Besides highly educated Egyptians who had greater ease in navigating politics, only minor differences were observed across years, education levels and age groups.
+  \item Almost all MENA Internet users use social media for at least 2 hours a day, with nearly half of them being heavy users. Facebook has the largest and widest spread of users, capturing 77 percent of the region's Internet users.
+  \item Social media has captured a significant share of the political information market, with 34 percent of MENA citizens citing social media as their primary source of information for breaking news. Five-in-ten of both youth and those with higher education preferred using social media to tune into political events. Greater trust in social media over traditional media varied greatly across countries, potentially due to the differences in level of state-control of the latter.
+  \item Overall, these findings from nationally representative public opinion surveys carried out by the Arab Barometer carry important implications for the future use of social media in mobilizing Arab citizens in political causes.
+
+\end{itemize}
+
+\pagebreak
+
+<<echo=FALSE>>=
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(R.utils)
+library(forcats)
+library(gridExtra)
+@
+
+<<echo=FALSE>>=
+age_categories <- function(age) {
+  ifelse(age <= 29, "18 to 29",
+         ifelse(age <= 39, "30 to 39",
+                ifelse(
+                  age <= 49, "40 to 49",
+                  ifelse(age <= 59, "50 to 59",
+                         "60+")
+                )))
+}
+
+op_dist <- function(dataframe) {
+  output <- dataframe %>%
+  group_by(question) %>%
+  summarize(Percent = weighted.mean(response, wt)*100)
+  return(output)
+}
+
+op_country <- function(dataframe) {
+  output <- dataframe %>%
+  group_by(question, country) %>%
+  summarize(Percent = weighted.mean(response, wt)*100)
+  return(output)
+}
+@
+
+<<echo=FALSE>>=
+options(digits = 10)
+data <- read.csv("ABV_Data_small_ENG.csv")
+data_clean <- data %>%
+  dplyr::filter(!is.na(wt),
+                id != 82873611) %>%
+  rename(region = q1, # rename columns
+         age = Q1001,
+         gender = Q1002,
+         settlement = q13,
+         education = Q1003,
+         sample = a1) %>%
+  mutate(age = ifelse(age <= 29, "18 to 29",
+                      ifelse(age <= 39, "30 to 39",
+                             ifelse(age <= 49, "40 to 49",
+                                    ifelse(age <= 59, "50 to 59",
+                                           "60+")))))
+@
+
+<<echo=FALSE>>=
+# Rename and gather
+data_scrub <- data_clean %>%
+  gather(key=question, value=response, -id, -country, -wt, -region,
+         -sample, -settlement,
+         -age, -gender, -education)
+
+# Make dataframe for binary levels
+data_binary <- data_clean %>%
+  mutate(q2185 = ifelse(Q218_5 == "strongly agree" | Q218_5 == "agree", 1, 0),
+         q404 = ifelse(Q404 == "very interested" | Q404 == "interested", 1, 0),
+         q409 = ifelse(Q409 == "throughout day" | Q409 == "a few days a week" | Q409 == "once daily" | Q409 == "weekly", 1, 0),
+         Q424 = ifelse(Q424 == "10 hrs" | Q424 == "10 hrs+" | Q424 == "2 hrs" | Q424 == "5 hrs", 1, 0),
+         Q421 = ifelse(Q421 == "social media", 1, 0),
+         Q521A_3 = ifelse(Q521A_3 == "strongly agree" | Q521A_3 == "agree", 1, 0),
+         Q521A_4 = ifelse(Q521A_4 == "strongly agree" | Q521A_4 == "agree", 1, 0)) %>%
+  dplyr::select(-Q412A3, -Q412A4, -Q412A6, -Q412A7, -Q412A8, -Q412A9, -Q412A10, -Q412A14,
+         -Q521A_3, -Q521A_4, -Q412A_OTHER, -Q412A98, -Q412A99, -Q218_5, -Q404, -Q409) %>%
+    gather(key=question, value=response, -id, -country, -wt, -region,
+         -sample, -settlement,
+         -age, -gender, -education)
+
+data_binary_solo <- data_clean %>%
+  mutate(Q521A_3 = ifelse(Q521A_3 == "strongly agree" | Q521A_3 == "agree", 1, 0),
+         Q521A_4 = ifelse(Q521A_4 == "strongly agree" | Q521A_4 == "agree", 1, 0)) %>%
+  select(id, country, wt, region,
+         sample, settlement,
+         age, gender, education, Q521A_3, Q521A_4) %>%
+  gather(key=question, value=response, -id, -country, -wt, -region,
+         -sample, -settlement,
+         -age, -gender, -education) %>%
+  group_by(question, country) %>%
+  summarize(Percent = round(weighted.mean(response, wt)*100, digits=0))
+
+soc_key <- c(Q412A3 = "Facebook",
+             Q412A4 = "Twitter",
+             Q412A6 = "Instagram",
+             Q412A7 = "YouTube",
+             Q412A8 = "WhatsApp",
+             Q412A9 = "Telegram",
+             Q412A10 = "Snapchat",
+             Q412A14 = "Other")
+
+data_split_internet <- data_clean %>%
+  filter(Q409 != "never",
+         Q409 != "refused",
+         Q409 != "don't know") %>%
+  select(-Q218_5, -Q404, -Q409, -Q424, -Q421, -Q521A_3,
+         -Q521A_4, -Q412A_OTHER, -Q412A98, -Q412A99)
+
+data_internet_gather <- data_split_internet %>%
+  gather(key=question, value=response, -id, -country, -wt, -region,
+         -sample, -settlement,
+         -age, -gender, -education) %>%
+  mutate(response = ifelse(response == "mentioned", 1, 0)) %>%
+  mutate(question = recode_factor(question, !!!soc_key))
+
+opinion_dist <- data_binary %>%
+  group_by(question) %>%
+  summarize(Percent = weighted.mean(response, wt)*100)
+
+opinion_country <- data_binary %>%
+  group_by(question, country) %>%
+  summarize(Percent = weighted.mean(response, wt)*100)
+ABIV <- read.csv("ABIV_English.csv")
+ABIII <- read.csv("ABIII_English.csv")
+ABII <- read.csv("ABII_English.csv")
+ABI <- read.csv("ABI_English.csv")
+
+# Drop top up sample
+ABIV.drop <- ABIV[ABIV$sample != "Syrian Refugees",]
+
+ABI.select <- ABI %>%
+  dplyr::select(country, q701, q702, q703, q5075, q215, q222) %>%
+  mutate(q2185 = ifelse(q5075 == "strongly agree" | q5075 == "agree", 1, 0),
+         q404 = ifelse(q215 == "very interested" | q215 == "interested", 1, 0),
+         q409 = ifelse(q222 == "at least once a week" | q222 == "daily or almost daily", 1, 0),
+         age = age_categories(q701)) %>%
+  rename(gender = q702,
+         education = q703) %>%
+  dplyr::select(-q5075, -q215, -q222, -q701) %>%
+  gather(key=question, value=response, -country, -gender,-age,-education) %>%
+  mutate(country = capitalize(country),
+         gender = capitalize(gender),
+         education = capitalize(education))
+
+ABI.sum <- ABI.select %>%
+  group_by(question) %>%
+  summarise(Percent = mean(response)*100)
+
+ABI.country <- ABI.select %>%
+  group_by(country, question) %>%
+  summarise(Percent = mean(response)*100)
+
+ABII.select <- ABII %>%
+  dplyr::select(country, wt, q1, q13, q1001, q1002, q1003, t1003, q2185, q404, q409) %>%
+  rename(gender = q1002,
+         education = q1003,
+         education.t = t1003,
+         region = q1,
+         settlement = q13,
+         age = q1001) %>%
+    mutate(country = substring(country, 4, 20),
+         gender = substring(gender, 4, 20),
+         gender = capitalize(gender),
+         region = substring(region, 7, 30),
+         settlement = substring(settlement, 4, 30),
+         region = substring(region, 7, 30),
+         education = substring(education, 4, 50),
+         education.t = substring(education.t, 4, 50),
+         q2185 = substring(q2185, 6, 30),
+         q404 = substring(q404, 4, 30),
+         q409 = substring(q409, 4, 30),
+         age = age_categories(as.numeric(age))) %>%
+  mutate(q2185 = ifelse(q2185 == "strongly agree" | q2185 == "agree", 1, 0),
+         q404 = ifelse(q404 == "very interested" | q404 == "interested", 1, 0),
+         q409 = ifelse(q409 == "at least once a week" | q409 == "daily or almost daily", 1, 0)) %>%
+  gather(key=question, value=response, -country,-gender,-education,
+         -education.t,-region,-settlement,-age, -wt)
+
+
+ABIII.select <- ABIII %>%
+  dplyr::select(country, wt, q1, q13, q1001, q1002, q1003, q1003t, q1003yem, q2185, q404, q409) %>%
+  rename(gender = q1002,
+         education = q1003,
+         education.t = q1003t,
+         education.y = q1003yem,
+         region = q1,
+         settlement = q13,
+         age = q1001) %>%
+  mutate(q2185 = ifelse(q2185 == "I strongly agree" | q2185 == "I agree", 1, 0),
+         q404 = ifelse(q404 == "Very interested" | q404 == "Interested", 1, 0),
+         q409 = ifelse(q409 == "At least once a week" | q409 == "Daily or almost daily", 1, 0),
+         age = age_categories(as.numeric(age))) %>%
+  gather(key=question, value=response, -country,-gender,-education,
+         -education.t,-education.y, -region,-settlement,-age, -wt)
+
+
+ABIV.select <- ABIV.drop %>%
+  dplyr::select(country, wt, q1, q13, q1001, q1002, q1003, t1003, q2185, q404, q409) %>%
+  rename(gender = q1002,
+         education = q1003,
+         education.t = t1003,
+         region = q1,
+         settlement = q13,
+         age = q1001) %>%
+  mutate(q2185 = ifelse(q2185 == "I strongly agree" | q2185 == "I agree", 1, 0),
+         q404 = ifelse(q404 == "Very interested" | q404 == "Interested", 1, 0),
+         q409 = ifelse(q409 == "I am online almost all day" | q409 == "Daily" | q409 == "Once a week" | q409 == "Several times a week", 1, 0),
+         age = age_categories(as.numeric(age))) %>%
+  gather(key=question, value=response, -country,-gender,-education,
+         -education.t,-region,-settlement,-age, -wt)
+
+
+ABIV.select2 <- ABIV.select %>%
+  dplyr::select(-education, -education.t) %>%
+  dplyr::filter(!is.na(wt))
+
+ABIV.op <- op_dist(ABIV.select2)
+ABIV.op <- ABIV.op %>%
+  mutate(Year = 2016)
+ABIII.op <- op_dist(ABIII.select)
+ABIII.op <- ABIII.op %>%
+  mutate(Year = 2013)
+ABII.op <- op_dist(ABII.select)
+ABII.op <- ABII.op %>%
+  mutate(Year = 2011)
+ABI.op <- ABI.select %>%
+  group_by(question) %>%
+  summarize(Percent = mean(response)*100)
+ABI.op <- ABI.op %>%
+  mutate(Year = 2006)
+ABV.op <- opinion_dist %>%
+  dplyr::filter(question == 'q2185' | question == 'q409' | question == 'q404') %>%
+  mutate(Year = 2018)
+ABall.op <- rbind(ABI.op, ABII.op, ABIII.op, ABIV.op, ABV.op)
+ABall.op <- ABall.op %>%
+  mutate(Percent = round(Percent, digits=0))
+
+ABV.edu <- data_clean %>%
+  filter(education != "don't know",
+         education != "refused") %>%
+  mutate(high.ed = ifelse(education == "Bachelor" | education == "Masters+" | education == "tertiary education", 1, 0)) %>%
+    mutate(Q218_5 = ifelse(Q218_5 == "strongly agree" | Q218_5 == "agree", 1, 0),
+         Q404 = ifelse(Q404 == "very interested" | Q404 == "interested", 1, 0),
+         Q409 = ifelse(Q409 == "throughout day" | Q409 == "a few days a week" | Q409 == "once daily" | Q409 == "weekly", 1, 0),
+         Q424 = ifelse(Q424 == "10 hrs" | Q424 == "10 hrs+" | Q424 == "2 hrs" | Q424 == "5 hrs", 1, 0),
+         Q421 = ifelse(Q421 == "social media", 1, 0),
+         Q521A_3 = ifelse(Q521A_3 == "strongly agree" | Q521A_3 == "agree", 1, 0),
+         Q521A_4 = ifelse(Q521A_4 == "strongly agree" | Q521A_4 == "agree", 1, 0)) %>%
+  select(-Q412A3, -Q412A4, -Q412A6, -Q412A7, -Q412A8, -Q412A9, -Q412A10, -Q412A14,
+         -Q412A_OTHER, -Q412A98, -Q412A99,-education) %>%
+  group_by(country, high.ed) %>%
+  mutate(country_wt = sum(wt)) %>%
+  ungroup() %>%
+  gather(key=question, value=response, -id, -country, -wt, -region,
+         -sample, -settlement,
+         -age, -gender, -high.ed, -country_wt) %>%
+  group_by(question, response, country, high.ed) %>%
+  summarise(country_wt = country_wt[1],
+            num = sum(wt),
+            mean = round(( num / country_wt) *100, digits=0)) %>%
+  select(question, response, country, country_wt, num, mean, high.ed)
+
+
+ABV.age <- data_clean %>%
+  filter(!is.na(age)) %>%
+  mutate(below30 = ifelse(age == "18 to 29", 1, 0)) %>%
+    mutate(Q218_5 = ifelse(Q218_5 == "strongly agree" | Q218_5 == "agree", 1, 0),
+         Q404 = ifelse(Q404 == "very interested" | Q404 == "interested", 1, 0),
+         Q409 = ifelse(Q409 == "throughout day" | Q409 == "a few days a week" | Q409 == "once daily" | Q409 == "weekly", 1, 0),
+         Q424 = ifelse(Q424 == "10 hrs" | Q424 == "10 hrs+" | Q424 == "2 hrs" | Q424 == "5 hrs", 1, 0),
+         Q421 = ifelse(Q421 == "social media", 1, 0),
+         Q521A_3 = ifelse(Q521A_3 == "strongly agree" | Q521A_3 == "agree", 1, 0),
+         Q521A_4 = ifelse(Q521A_4 == "strongly agree" | Q521A_4 == "agree", 1, 0)) %>%
+  select(-Q412A3, -Q412A4, -Q412A6, -Q412A7, -Q412A8, -Q412A9, -Q412A10, -Q412A14,
+         -Q412A_OTHER, -Q412A98, -Q412A99, -age) %>%
+  group_by(country, below30) %>%
+  mutate(country_wt = sum(wt)) %>%
+  ungroup() %>%
+  gather(key=question, value=response, -id, -country, -wt, -region,
+         -sample, -settlement,
+         -below30, -gender, -education, -country_wt) %>%
+  group_by(question, response, country, below30) %>%
+  summarise(country_wt = country_wt[1],
+            num = sum(wt),
+            mean = round(( num / country_wt) *100, digits=0)) %>%
+  select(question, response, country, country_wt, num, mean, below30)
+
+
+ABV.settlement <- data_clean %>%
+  filter(settlement != "refugee camp") %>%
+  mutate(settlement = ifelse(settlement == "urban", 1, 0)) %>%
+    mutate(Q218_5 = ifelse(Q218_5 == "strongly agree" | Q218_5 == "agree", 1, 0),
+         Q404 = ifelse(Q404 == "very interested" | Q404 == "interested", 1, 0),
+         Q409 = ifelse(Q409 == "throughout day" | Q409 == "a few days a week" | Q409 == "once daily" | Q409 == "weekly", 1, 0),
+         Q424 = ifelse(Q424 == "10 hrs" | Q424 == "10 hrs+" | Q424 == "2 hrs" | Q424 == "5 hrs", 1, 0),
+         Q421 = ifelse(Q421 == "social media", 1, 0),
+         Q521A_3 = ifelse(Q521A_3 == "strongly agree" | Q521A_3 == "agree", 1, 0),
+         Q521A_4 = ifelse(Q521A_4 == "strongly agree" | Q521A_4 == "agree", 1, 0)) %>%
+  select(-Q412A3, -Q412A4, -Q412A6, -Q412A7, -Q412A8, -Q412A9, -Q412A10, -Q412A14,
+         -Q412A_OTHER, -Q412A98, -Q412A99) %>%
+  group_by(country, settlement) %>%
+  mutate(country_wt = sum(wt)) %>%
+  ungroup() %>%
+  gather(key=question, value=response, -id, -country, -wt, -region,
+         -sample, -settlement,
+         -age, -gender, -education, -country_wt) %>%
+  group_by(question, response, country, settlement) %>%
+  summarise(country_wt = country_wt[1],
+            num = sum(wt),
+            mean = round(( num / country_wt) *100, digits=0)) %>%
+  select(question, response, country, country_wt, num, mean, settlement)
+
+
+
+q2185_trend <- ABall.op %>%
+  dplyr::filter(question == "q2185") %>%
+  ggplot(aes(x=as.factor(Year), y=Percent, group=1, label=Percent)) +
+  geom_point(size=2, color="#2096BA", shape=15) +
+  stat_summary(fun.y=sum, geom="line", color="#2096BA") + theme_classic() +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100)) +
+  ggtitle("Trend in Belief that Politics
+are Too Complicated", subtitle =
+"% saying they agree or strongly agree
+that politics are so complicated they
+cannot understand what is happening") +
+  theme(plot.title = element_text(hjust = 0.5, size=25),
+        plot.subtitle = element_text(hjust = 0.5, size=15, face = "italic"),
+        plot.caption = element_text(size=11, hjust=0),
+        axis.text.y = element_text(size=13),
+        axis.text.x = element_text(size=13)) +
+  labs(x="Year",
+       caption = "Notes: Weighted estimates (2011, 2013, 2016, 2018);
+unweighted estimates (2006).
+Number of countries vary by waves.
+Source: Arab Barometer.") +
+  geom_text(aes(label=Percent), hjust=-0.05, vjust=-0.5, size=5)
+
+#q404
+q404_trend <- ABall.op %>%
+  filter(question == "q404") %>%
+  ggplot(aes(x=as.factor(Year), y=Percent, group=1, labe=Percent)) +
+  geom_point(size=2, color="#2096BA", shape=15) +
+  stat_summary(fun.y=sum, geom="line",color="#2096BA") + theme_classic() +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100)) +
+  ggtitle("Trend in Interest in Politics", subtitle =
+"% saying they are interested or
+very interested in politics.") +
+  theme(plot.title = element_text(hjust = 0.5, size=25),
+        plot.subtitle = element_text(hjust = 0.5, size=18, face = "italic"),
+        plot.caption = element_text(size=11, hjust=0),
+        axis.text.y = element_text(size=13),
+        axis.text.x = element_text(size=13)) +
+  labs(x="Year",
+       caption = "Notes: Weighted estimates (2011, 2013, 2016, 2018);
+unweighted estimates (2006).
+Number of countries vary by waves.
+Source: Arab Barometer.") +
+  geom_text(aes(label=Percent), hjust=-0.05, vjust=-0.5, size=5)
+
+#q409
+q409_trend <- ABall.op %>%
+  filter(question == "q409") %>%
+  ggplot(aes(x=as.factor(Year), y=Percent, group=1, labe=Percent)) +
+  geom_point(size=2,color="#2096BA", shape=15) +
+  stat_summary(fun.y=sum, geom="line",color="#2096BA") + theme_classic() +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100)) +
+  ggtitle("Trend in Internet usage", subtitle =
+"% saying they use the Internet at
+least once a week") +
+  theme(plot.title = element_text(hjust = 0.5, size=25),
+        plot.subtitle = element_text(hjust = 0.5, size=18, face = "italic"),
+        plot.caption = element_text(size=11, hjust=0),
+        axis.text.y = element_text(size=13),
+        axis.text.x = element_text(size=13)) +
+  labs(x="Year",
+       caption = "Notes: Weighted estimates (2011, 2013, 2016, 2018);
+unweighted estimates (2006).
+Number of countries vary by waves.
+Source: Arab Barometer.") +
+  geom_text(aes(label=Percent), hjust=-0.05, vjust=-0.5, size=5)
+
+soc_distribution <- data_internet_gather %>%
+  group_by(question) %>%
+  summarize(Percent = round(weighted.mean(response, wt)*100, digits=0))
+
+soc_distribution_country <- data_internet_gather %>%
+  group_by(question, country) %>%
+  summarize(Percent = round(weighted.mean(response, wt)*100, digits=0))
+
+soc_totalw <- sum(data_split_internet$wt)
+soc_dist_test <- data_internet_gather %>%
+  group_by(question, response) %>%
+  summarize(num = sum(response*wt),
+            mean = (num/soc_totalw)*100)%>%
+  filter(response==1)
+
+# Overall
+q412a_bar <- soc_distribution %>%
+  ggplot(aes(x=reorder(question,Percent), y=Percent)) + geom_bar(stat="identity", fill="#B1C2Cf") + coord_flip() +
+  theme_classic() + ggtitle("Usage of Platforms
+(Split sample; 
+Internet users n=18,059)",subtitle = "% saying they actively use a particular
+social media or text messaging service") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.subtitle = element_text(hjust = 0.5, size=13, face = "italic"),
+        plot.caption = element_text(size=7, hjust=0),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size=13),
+        axis.text.x = element_text(size=13)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100)) +
+  geom_text(aes(label=Percent), nudge_y = 3.5, size=5)
+
+# Facebook
+q412a_facebook <- soc_distribution_country %>%
+  filter(question=="Facebook") %>%
+  ggplot(aes(x=reorder(country,Percent), y=Percent)) + geom_bar(stat="identity",fill="#DF6E21") + coord_flip() +
+  theme_classic() + ggtitle("Facebook
+(Split sample;
+Internet users n=18,059)",subtitle = "% saying they actively use Facebook") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.subtitle = element_text(hjust = 0.5, size=12, face = "italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  geom_text(aes(label=Percent), nudge_y = 3, size=4)
+
+# Whatsapp
+q412a_whatsapp <- soc_distribution_country %>%
+  filter(question=="WhatsApp") %>%
+  ggplot(aes(x=reorder(country,Percent), y=Percent)) + geom_bar(stat="identity",fill="#DF6E21") + coord_flip() +
+  theme_classic() + ggtitle("WhatsApp
+(Split sample;
+Internet users n=18,059)",subtitle = "% saying they actively use WhatsApp") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.subtitle = element_text(hjust = 0.5, size=12, face = "italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  geom_text(aes(label=Percent), nudge_y = 3, size=4)
+
+# Whatsapp
+q412a_youtube <- soc_distribution_country %>%
+  filter(question=="YouTube") %>%
+  ggplot(aes(x=reorder(country,Percent), y=Percent)) + geom_bar(stat="identity",fill="#DF6E21") + coord_flip() +
+  theme_classic() + ggtitle("YouTube
+(Split sample;
+Internet users n=18,059)",subtitle = "% saying they actively use YouTube") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.subtitle = element_text(hjust = 0.5, size=12, face = "italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  geom_text(aes(label=Percent), nudge_y = 3, size=4)
+
+# Instagram
+q412a_instagram <- soc_distribution_country %>%
+  filter(question=="Instagram") %>%
+  ggplot(aes(x=reorder(country,Percent), y=Percent)) + geom_bar(stat="identity",fill="#DF6E21") + coord_flip() +
+  theme_classic() + ggtitle("Instagram
+(Split sample;
+Internet users n=18,059)",subtitle = "% saying they actively use Instagram") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.subtitle = element_text(hjust = 0.5, size=12, face = "italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  geom_text(aes(label=Percent), nudge_y = 3, size=4)
+
+# Snapchat
+q412a_snapchat <- soc_distribution_country %>%
+  filter(question=="Snapchat") %>%
+  ggplot(aes(x=reorder(country,Percent), y=Percent)) + geom_bar(stat="identity",fill="#DF6E21") + coord_flip() +
+  theme_classic() + ggtitle("Snapchat
+(Split sample;
+Internet users n=18,059)",subtitle = "% saying they actively use Snapchat") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.subtitle = element_text(hjust = 0.5, size=12, face = "italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  geom_text(aes(label=Percent), nudge_y = 3, size=4)
+
+# Twitter
+q412a_twitter <- soc_distribution_country %>%
+  filter(question=="Twitter") %>%
+  ggplot(aes(x=reorder(country,Percent), y=Percent)) + geom_bar(stat="identity",fill="#DF6E21") + coord_flip() +
+  theme_classic() + ggtitle("Twitter
+(Split sample;
+Internet users n=18,059)",subtitle = "% saying they actively use Twitter") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.subtitle = element_text(hjust = 0.5, size=12, face = "italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  geom_text(aes(label=Percent), nudge_y = 3, size=4)
+
+internet_users <- data_clean %>%
+  filter(Q409 != "never",
+         Q409 != "refused",
+         Q409 != "don't know")
+
+q421_by_factor <- data_scrub %>%
+  filter(question=="Q421") %>%
+  mutate(country_wt = sum(wt)) %>%
+  group_by(response) %>%
+  summarise(country_wt = country_wt[1],
+            num = sum(wt),
+            mean = round(( num / country_wt) *100, digits=0)) %>%
+  filter(response %in% c("social media","television",
+                         "face-to-face","radio","telephone","newspaper"))
+
+q421_by_country <- data_scrub %>%
+  filter(question=="Q421") %>%
+  mutate(socmed = ifelse(response=="social media",1,0)) %>%
+  group_by(country) %>%
+  mutate(country_wt = sum(wt)) %>%
+  ungroup() %>%
+  group_by(country,socmed) %>%
+  summarise(country_wt = country_wt[1],
+            num = sum(wt),
+            Percent = round(( num / country_wt) *100, digits=0)) %>%
+  filter(socmed==1)
+
+q421_by_edu <- data_scrub %>%
+  filter(question=="Q421") %>%
+  filter(education != "don't know",
+         education != "refused") %>%
+  mutate(high.ed = ifelse(education == "Bachelor" | education == "Masters+" | education == "tertiary education", 1, 0)) %>%
+  group_by(high.ed) %>%
+  mutate(country_wt = sum(wt)) %>%
+  ungroup() %>%
+  group_by(high.ed, response) %>%
+  summarise(country_wt = country_wt[1],
+            num = sum(wt),
+            mean = round(( num / country_wt) *100, digits=0))
+
+
+q421_by_age <- data_scrub %>%
+  filter(question=="Q421") %>%
+  filter(!is.na(age)) %>%
+  mutate(below30 = ifelse(age == "18 to 29", 1, 0)) %>%
+  group_by(below30) %>%
+  mutate(country_wt = sum(wt)) %>%
+  ungroup() %>%
+  group_by(below30, response) %>%
+  summarise(country_wt = country_wt[1],
+            num = sum(wt),
+            mean = round(( num / country_wt) *100, digits=0))
+
+q421_by_settlement <- data_scrub %>%
+  filter(question=="Q421") %>%
+  filter(settlement != "refugee camp") %>%
+  mutate(settlement = ifelse(settlement == "urban", 1, 0)) %>%
+  group_by(settlement) %>%
+  mutate(country_wt = sum(wt)) %>%
+  ungroup() %>%
+  group_by(settlement, response) %>%
+  summarise(country_wt = country_wt[1],
+            num = sum(wt),
+            mean = round(( num / country_wt) *100, digits=0))
+
+
+q421_bar <- q421_by_factor %>%
+  ggplot(aes(x=reorder(response,mean), y=mean)) + geom_bar(stat="identity", position="dodge",fill="#B1C2CF")+  coord_flip() +
+  theme_classic() + ggtitle("Primary source of information
+for breaking news") +
+  theme(plot.title = element_text(hjust = 0.5, size=25),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size=13),
+        axis.text.x = element_text(size=13)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  ylab("Percent") +
+  geom_text(aes(label=mean, y=mean+3), size=4, position = position_dodge(width=1))
+
+q421_country <- q421_by_country %>%
+  ggplot(aes(x=reorder(country,Percent), y=Percent)) +
+  geom_bar(stat="identity", fill="#DF6E21") + coord_flip() +
+  theme_classic() + ggtitle("Social Media as Primary Source",
+  subtitle = "% saying they use social media as
+their primary source of information") +
+  theme(plot.title = element_text(hjust = 0.5, size=25),
+        plot.subtitle = element_text(hjust = 0.5, size=14, face = "italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size=14),
+        axis.text.x = element_text(size=13)) +
+  labs(caption = "Notes: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100)) +
+  geom_text(aes(label=Percent), nudge_y = 5, size=5)
+
+
+q421_edu <- ABV.edu %>%
+  filter(question == "Q421",
+         response == 1) %>%
+    ggplot(aes(x=fct_rev(country), y=mean, fill=as.factor(high.ed), na.rm=TRUE)) + geom_bar(stat="identity", position="dodge") + coord_flip() +
+  theme_classic() + ggtitle("Social Media as Primary Source
+of Information by Education") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.text = element_text(size=9),
+        legend.key.size = unit(9, "pt"),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  ylab("Percent") +
+  geom_text(aes(label=mean, y=mean+4), size=3.5, position = position_dodge(width=1)) +
+  scale_fill_manual(values=c("#DF6E21","#FBA950"), labels=c("Secondary and below", "Higher education"))
+
+
+q421_age <- ABV.age %>%
+  filter(question == "Q421",
+         response == 1) %>%
+    ggplot(aes(x=fct_rev(country), y=mean, fill=as.factor(below30), na.rm=TRUE)) + geom_bar(stat="identity", position="dodge") +
+  coord_flip() +
+  theme_classic() + ggtitle("Social Media as Primary Source
+of Information by Age") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.text = element_text(size=9),
+        legend.key.size = unit(9, "pt"),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  ylab("Percent") +
+  geom_text(aes(label=mean, y=mean+4), size=3.5, position = position_dodge(width=1)) +
+  scale_fill_manual(values=c("#21718A","#2096BA"),labels=c("30+", "18-30"))
+
+
+q421_settlement <- q421_by_settlement %>%
+  ggplot(aes(x=response, y=mean, fill=factor(settlement))) + geom_bar(stat="identity", position="dodge")+ coord_flip() +
+  theme_classic() + ggtitle("Primary source of information
+by Settlement") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        legend.position = c(0.8,0.3),
+        legend.title = element_text(size=9),
+        legend.text = element_text(size=9),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100)) +  ylab("Percent") + scale_fill_discrete(name="Settlement",
+                         labels=c("Rural", "Urban"))+
+  geom_text(aes(label=mean, y=mean+3), size=4, position = position_dodge(width=1))
+
+internet_hours <- internet_users %>%
+  mutate(country_wt = sum(wt)) %>%
+  gather(key=question, value=response, -id, -country, -wt, -region,
+         -sample, -settlement,
+         -age, -gender, -education, -country_wt) %>%
+  filter(question=="Q424") %>%
+  group_by(response) %>%
+  summarise(country_wt = country_wt[1],
+            num = sum(wt),
+            mean = round(( num / country_wt) *100, digits=0)) %>%
+  filter(response!="", response!="refused") %>%
+  arrange(match(response, c("10 hrs+","10 hrs","5 hrs","2 hrs", "0 hrs","don't know")))
+
+internet_hours$response <- factor(internet_hours$response,levels=c("don't know",
+                                                                   "0 hrs","2 hrs",
+                                                                   "5 hrs", "10 hrs",
+                                                                   "10 hrs+"))
+
+q424_bar <- internet_hours %>%
+  ggplot(aes(x=response, y=mean)) + 
+  geom_bar(stat="identity", position="dodge", fill="#B1C2CF") + coord_flip() +
+  theme_classic() + ggtitle("Hours in a Day on Social Media
+(Split sample;
+Internet users n=18,059)") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.caption = element_text(size=14, hjust=0),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size=13),
+        axis.text.x = element_text(size=13)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  ylab("Percent")+
+  geom_text(aes(label=mean, y=mean+3.5), size=5, position = position_dodge(width=1))
+
+
+internet_hours_edu <- internet_users %>%
+  dplyr::select(wt,education,Q424) %>%
+  filter(education != "don't know",
+         education != "refused") %>%
+  mutate(high.ed = ifelse(education == "Bachelor" | education == "Masters+" | education == "tertiary education", 1, 0)) %>%
+  group_by(high.ed) %>%
+  mutate(country_wt = sum(wt)) %>%
+  ungroup() %>%
+  group_by(high.ed, Q424) %>%
+  summarise(country_wt = country_wt[1],
+            num = sum(wt),
+            mean = round(( num / country_wt) *100, digits=0)) %>%
+  filter(Q424!="",Q424!="refused")
+
+internet_hours_edu$Q424 <- factor(internet_hours_edu$Q424,levels=c("don't know",
+                                                                   "0 hrs","2 hrs",
+                                                                   "5 hrs", "10 hrs",
+                                                                   "10 hrs+"))
+
+internet_hours_age <- internet_users %>%
+  dplyr::select(wt,age,Q424) %>%
+  filter(!is.na(age)) %>%
+  mutate(below30 = ifelse(age == "18 to 29", 1, 0)) %>%
+  group_by(below30) %>%
+  mutate(country_wt = sum(wt)) %>%
+  ungroup() %>%
+  group_by(below30, Q424) %>%
+  summarise(country_wt = country_wt[1],
+            num = sum(wt),
+            mean = round(( num / country_wt) *100, digits=0)) %>%
+  filter(Q424!="", Q424!="refused")
+
+internet_hours_age$Q424 <- factor(internet_hours_age$Q424,levels=c("don't know",
+                                                                   "0 hrs","2 hrs",
+                                                                   "5 hrs", "10 hrs",
+                                                                   "10 hrs+"))
+
+internet_hours_settlement <- internet_users %>%
+  dplyr::select(wt,settlement,Q424) %>%
+  filter(settlement != "refugee camp") %>%
+  mutate(settlement = ifelse(settlement == "urban", 1, 0)) %>%
+  group_by(settlement) %>%
+  mutate(country_wt = sum(wt)) %>%
+  ungroup() %>%
+  group_by(settlement, Q424) %>%
+  summarise(country_wt = country_wt[1],
+            num = sum(wt),
+            mean = round(( num / country_wt) *100, digits=0)) %>%
+  filter(Q424!="")
+
+q424_edu <- internet_hours_edu %>%
+  ggplot(aes(x=Q424, y=mean, fill=factor(high.ed))) + geom_bar(stat="identity", position="dodge")+ coord_flip() +
+  theme_classic() + ggtitle("Hours in a Day on
+Social Media by Education",
+subtitle = "(Split sample; Internet users n=18,059)") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.subtitle = element_text(hjust = 0.5, size=14, face = "italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        legend.title = element_blank(),
+        legend.position = "bottom",
+        legend.text = element_text(size=9),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100)) +  ylab("Percent") + scale_fill_manual(values=c("#DF6E21","#FBA950"), labels=c("Secondary and below", "Higher education")) +
+  geom_text(aes(label=mean, y=mean+3), size=4, position = position_dodge(width=1))
+
+q424_age <- internet_hours_age %>%
+  ggplot(aes(x=Q424, y=mean, fill=factor(below30))) + geom_bar(stat="identity", position="dodge")+ coord_flip() +
+  theme_classic() + ggtitle("Hours in a Day on
+Social Media by Age",
+subtitle = "(Split sample; Internet users n=18,059)") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.subtitle = element_text(hjust = 0.5, size=14, face = "italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.text = element_text(size=9),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100)) +  ylab("Percent") + scale_fill_manual(values=c("#21718A","#2096BA"),labels=c("30+", "18-30"))+
+  geom_text(aes(label=mean, y=mean+3), size=4, position = position_dodge(width=1))
+
+q424_settlement <- internet_hours_settlement %>%
+  ggplot(aes(x=Q424, y=mean, fill=factor(settlement))) + geom_bar(stat="identity", position="dodge")+ coord_flip() +
+  theme_classic() + ggtitle("Hours in a day on
+social media by settlement
+(Split sample; n=18,059)") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        legend.position = c(0.8,0.3),
+        legend.title = element_text(size=9),
+        legend.text = element_text(size=9),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100)) +  ylab("Percent") + scale_fill_discrete(name="Settlement",
+                         labels=c("Rural", "Urban"))+
+  geom_text(aes(label=mean, y=mean+3), size=4, position = position_dodge(width=1))
+
+data_binary_solo <- data_clean %>%
+  mutate(Q521A_3 = ifelse(Q521A_3 == "strongly agree" | Q521A_3 == "agree", 1, 0),
+         Q521A_4 = ifelse(Q521A_4 == "strongly agree" | Q521A_4 == "agree", 1, 0)) %>%
+  select(id, country, wt, region,
+         sample, settlement,
+         age, gender, education, Q521A_3, Q521A_4) %>%
+  gather(key=question, value=response, -id, -country, -wt, -region,
+         -sample, -settlement,
+         -age, -gender, -education) %>%
+  group_by(question, country) %>%
+  summarize(Percent = round(weighted.mean(response, wt)*100, digits=0))
+
+q521a3_bar <- data_binary_solo %>%
+  filter(question == "Q521A_3") %>%
+  ggplot(aes(x=reorder(country, Percent), y=Percent)) + geom_bar(stat="identity",fill="#DF6E21") +
+  theme_classic() + coord_flip() +
+  ggtitle("Trust in Social Media",
+          subtitle = "% saying they agree or strongly agree
+that they trust information from social media
+more than that from newspapers or TV") +
+  theme(plot.title = element_text(hjust = 0.5, size=25),
+        plot.subtitle = element_text(hjust = 0.5, size=14, face = "italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size=13),
+        axis.text.x = element_text(size=13)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  geom_text(aes(label=Percent), nudge_y = 3, size=5) +
+  scale_fill_manual(values="#DF6E21")
+
+q521a4_bar <- data_binary_solo %>%
+  filter(question == "Q521A_4") %>%
+  ggplot(aes(x=reorder(country, Percent), y=Percent)) + geom_bar(stat="identity",fill="#DF6E21") +
+  theme_classic() + coord_flip() +
+  ggtitle("Informed about Politics",
+          subtitle = "% saying they agree or strongly agree
+that they are well informed about
+political events in their country") +
+  theme(plot.title = element_text(hjust = 0.5, size=25),
+        plot.subtitle = element_text(hjust = 0.5, size=14, face = "italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size=13),
+        axis.text.x = element_text(size=13)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  geom_text(aes(label=Percent), nudge_y = 3, size=5) 
+
+q409.edu <- ABV.edu %>%
+  filter(question == "Q409",
+         response == 1) %>%
+    ggplot(aes(x=fct_rev(country), y=mean, fill=as.factor(high.ed), na.rm=TRUE)) + geom_bar(stat="identity", position="dodge") + coord_flip() +
+  theme_classic() + ggtitle("Use of Internet by Education", subtitle="% saying they use the Internet at
+least once a week") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.subtitle = element_text(hjust=0.5, size=12, face="italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.text = element_text(size=9),
+        legend.key.size = unit(9, "pt"),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  ylab("Percent") +
+  geom_text(aes(label=mean, y=mean+3), size=3.5, position = position_dodge(width=1)) + scale_fill_discrete(name="Education Level",
+                         labels=c("Secondary and below", "Higher education"))
+
+q409.age <- ABV.age %>%
+  filter(question == "Q409",
+         response == 1) %>%
+    ggplot(aes(x=fct_rev(country), y=mean, fill=as.factor(below30), na.rm=TRUE)) + geom_bar(stat="identity", position="dodge") + coord_flip() +
+  theme_classic() + ggtitle("Use of Internet by Age", subtitle="% saying they use the Internet at
+least once a week") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.subtitle = element_text(hjust=0.5, size=12, face="italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.text = element_text(size=9),
+        legend.key.size = unit(9, "pt"),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  ylab("Percent") +
+  geom_text(aes(label=mean, y=mean+2), size=3.5, position = position_dodge(width=1)) + scale_fill_discrete(name="Age",
+                         labels=c("30+", "Below 30"))
+
+q409.settlement <- ABV.settlement %>%
+  filter(question == "Q409",
+         response == 1) %>%
+    ggplot(aes(x=fct_rev(country), y=mean, fill=as.factor(settlement), na.rm=TRUE)) + geom_bar(stat="identity", position="dodge") + coord_flip() +
+  theme_classic() + ggtitle("Use of Internet by Settlement", subtitle="% saying they use the Internet at
+least once a week") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.subtitle = element_text(hjust=0.5, size=12, face="italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.text = element_text(size=9),
+        legend.key.size = unit(9, "pt"),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  ylab("Percent") +
+  geom_text(aes(label=mean, y=mean+3), size=4, position = position_dodge(width=1)) + scale_fill_discrete(name="Settlement",
+                         labels=c("Rural", "Urban"))
+
+q404.edu <- ABV.edu %>%
+  filter(question == "Q404",
+         response == 1) %>%
+    ggplot(aes(x=fct_rev(country), y=mean, fill=as.factor(high.ed), na.rm=TRUE)) + geom_bar(stat="identity", position="dodge") + coord_flip() +
+  theme_classic() + ggtitle("Interest in Politics by Education", subtitle="% saying they are interested or
+very interested in politics") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.subtitle = element_text(hjust=0.5, size=12, face="italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.text = element_text(size=9),
+        legend.key.size = unit(9, "pt"),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  ylab("Percent") +
+  geom_text(aes(label=mean, y=mean+4), size=3.5, position = position_dodge(width=1)) + scale_fill_manual(values=c("#DF6E21","#FBA950"), labels=c("Secondary and below", "Higher education"))
+
+q404.age <- ABV.age %>%
+  filter(question == "Q404",
+         response == 1) %>%
+    ggplot(aes(x=fct_rev(country), y=mean, fill=as.factor(below30), na.rm=TRUE)) + geom_bar(stat="identity", position="dodge") + coord_flip() +
+  theme_classic() + ggtitle("Interest in Politics by Age", subtitle="% saying they are interested or
+very interested in politics") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.subtitle = element_text(hjust=0.5, size=12, face="italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.text = element_text(size=9),
+        legend.key.size = unit(9, "pt"),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  ylab("Percent") +
+  geom_text(aes(label=mean, y=mean+4), size=3.5, position = position_dodge(width=1)) +
+  scale_fill_manual(values=c("#21718A","#2096BA"),labels=c("30+", "18-30"))
+
+q404.settlement <- ABV.settlement %>%
+  filter(question == "Q404",
+         response == 1) %>%
+    ggplot(aes(x=fct_rev(country), y=mean, fill=as.factor(settlement), na.rm=TRUE)) + geom_bar(stat="identity", position="dodge") + coord_flip() +
+  theme_classic() + ggtitle("Interest in Politics by Settlement", subtitle="% saying they are interested or
+very interested in politics") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.subtitle = element_text(hjust=0.5, size=12, face="italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.text = element_text(size=9),
+        legend.key.size = unit(9, "pt"),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  ylab("Percent") +
+  geom_text(aes(label=mean, y=mean+4), size=3.5, position = position_dodge(width=1)) + scale_fill_discrete(name="Settlement",
+                         labels=c("Rural", "Urban"))
+
+q2185.edu <- ABV.edu %>%
+  filter(question == "Q218_5",
+         response == 1) %>%
+    ggplot(aes(x=fct_rev(country), y=mean, fill=as.factor(high.ed), na.rm=TRUE)) + geom_bar(stat="identity", position="dodge") + coord_flip() +
+  theme_classic() + ggtitle("Politics are Complicated
+by Education",
+subtitle="% saying they agree or strongly agree
+that politics are too complicated") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.subtitle = element_text(hjust=0.5, size=12, face="italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.text = element_text(size=9),
+        legend.key.size = unit(9, "pt"),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  ylab("Percent") +
+  geom_text(aes(label=mean, y=mean+4), size=3.5, position = position_dodge(width=1)) +
+  scale_fill_manual(values=c("#DF6E21","#FBA950"), labels=c("Secondary and below", "Higher education"))
+
+q2185.age <- ABV.age %>%
+  filter(question == "Q218_5",
+         response == 1) %>%
+    ggplot(aes(x=fct_rev(country), y=mean, fill=as.factor(below30), na.rm=TRUE)) + geom_bar(stat="identity", position="dodge") + coord_flip() +
+  theme_classic() + ggtitle("Politics are Complicated
+by Age", subtitle="% saying they agree or strongly agree
+that politics are too complicated") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.subtitle = element_text(hjust=0.5, size=12, face="italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.text = element_text(size=9),
+        legend.key.size = unit(9, "pt"),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  ylab("Percent") +
+  geom_text(aes(label=mean, y=mean+4), size=3.5, position = position_dodge(width=1)) +
+  scale_fill_manual(values=c("#21718A","#2096BA"),labels=c("30+", "18-30"))
+
+q2185.settlement <- ABV.settlement %>%
+  filter(question == "Q218_5",
+         response == 1) %>%
+    ggplot(aes(x=fct_rev(country), y=mean, fill=as.factor(settlement), na.rm=TRUE)) + geom_bar(stat="identity", position="dodge") + coord_flip() +
+  theme_classic() + ggtitle("Politics are Complicated
+by Settlement", subtitle="% saying they agree or
+strongly agree") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.subtitle = element_text(hjust=0.5, size=12, face="italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.text = element_text(size=9),
+        legend.key.size = unit(9, "pt"),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  ylab("Percent") +
+  geom_text(aes(label=mean, y=mean+4), size=3.5, position = position_dodge(width=1)) + scale_fill_discrete(name="Settlement",
+                         labels=c("Rural", "Urban"))
+
+q521a3.edu <- ABV.edu %>%
+  filter(question == "Q521A_3",
+         response == 1) %>%
+    ggplot(aes(x=fct_rev(country), y=mean, fill=as.factor(high.ed), na.rm=TRUE)) + geom_bar(stat="identity", position="dodge") + coord_flip() +
+  theme_classic() + ggtitle("Trust in Social Media by Education", subtitle="% saying they agree or strongly agree
+that they trust information from social media
+more than that from newspapers or TV") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.subtitle = element_text(hjust=0.5, size=12, face="italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.text = element_text(size=9),
+        legend.key.size = unit(9, "pt"),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  ylab("Percent") +
+  geom_text(aes(label=mean, y=mean+4), size=3.5, position = position_dodge(width=1)) +
+  scale_fill_manual(values=c("#DF6E21","#FBA950"), labels=c("Secondary and below", "Higher education"))
+
+q521a3.age <- ABV.age %>%
+  filter(question == "Q521A_3",
+         response == 1) %>%
+    ggplot(aes(x=fct_rev(country), y=mean, fill=as.factor(below30), na.rm=TRUE)) + geom_bar(stat="identity", position="dodge") + coord_flip() +
+  theme_classic() + ggtitle("Trust in Social Media by Age", subtitle="% saying they agree or strongly agree
+that they trust information from social media
+more than that from newspapers or TV") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.subtitle = element_text(hjust=0.5, size=12, face="italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.text = element_text(size=9),
+        legend.key.size = unit(9, "pt"),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  ylab("Percent") +
+  geom_text(aes(label=mean, y=mean+4), size=3.5, position = position_dodge(width=1)) +
+  scale_fill_manual(values=c("#21718A","#2096BA"),labels=c("30+", "18-30"))
+
+q521a3.settlement <- ABV.settlement %>%
+  filter(question == "Q521A_3",
+         response == 1) %>%
+    ggplot(aes(x=fct_rev(country), y=mean, fill=as.factor(settlement), na.rm=TRUE)) + geom_bar(stat="identity", position="dodge") + coord_flip() +
+  theme_classic() + ggtitle("Trust in Social Media
+by Settlement", subtitle="% saying they agree or strongly agree
+that they trust information from social media
+more than that from newspapers or TV") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.subtitle = element_text(hjust=0.5, size=12, face="italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.text = element_text(size=9),
+        legend.key.size = unit(9, "pt"),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  ylab("Percent") +
+  geom_text(aes(label=mean, y=mean+4), size=3.5, position = position_dodge(width=1)) + scale_fill_discrete(name="Settlement",
+                         labels=c("Rural", "Urban"))
+
+q521a4.edu <- ABV.edu %>%
+  filter(question == "Q521A_4",
+         response == 1) %>%
+    ggplot(aes(x=fct_rev(country), y=mean, fill=as.factor(high.ed), na.rm=TRUE)) + geom_bar(stat="identity", position="dodge") + coord_flip() +
+  theme_classic() + ggtitle("Informed about Politics by Education",
+                            subtitle="% saying they agree or strongly agree
+that they are well informed about
+political events in their country") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.subtitle = element_text(hjust=0.5, size=12, face="italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.text = element_text(size=9),
+        legend.key.size = unit(9, "pt"),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  ylab("Percent") +
+  geom_text(aes(label=mean, y=mean+4), size=3.5, position = position_dodge(width=1)) +
+  scale_fill_manual(values=c("#DF6E21","#FBA950"), labels=c("Secondary and below", "Higher education"))
+
+q521a4.age <- ABV.age %>%
+  filter(question == "Q521A_4",
+         response == 1) %>%
+    ggplot(aes(x=fct_rev(country), y=mean, fill=as.factor(below30), na.rm=TRUE)) + geom_bar(stat="identity", position="dodge") + coord_flip() +
+  theme_classic() + ggtitle("Informed about Politics by Age", subtitle="% saying they agree or strongly agree
+that they are well informed about
+political events in their country") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.subtitle = element_text(hjust=0.5, size=12, face="italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.text = element_text(size=9),
+        legend.key.size = unit(9, "pt"),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  ylab("Percent") +
+  geom_text(aes(label=mean, y=mean+4), size=3.5, position = position_dodge(width=1)) +
+  scale_fill_manual(values=c("#21718A","#2096BA"),labels=c("30+", "18-30"))
+
+q521a4.settlement <- ABV.settlement %>%
+  filter(question == "Q521A_4",
+         response == 1) %>%
+    ggplot(aes(x=fct_rev(country), y=mean, fill=as.factor(settlement), na.rm=TRUE)) + geom_bar(stat="identity", position="dodge") + coord_flip() +
+  theme_classic() + ggtitle("Informed about Politics
+by Settlement", subtitle="% saying they agree or strongly agree
+that they are well informed about
+political events in their country") +
+  theme(plot.title = element_text(hjust = 0.5, size=23),
+        plot.subtitle = element_text(hjust=0.5, size=12, face="italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.text = element_text(size=9),
+        legend.key.size = unit(9, "pt"),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100))+
+  ylab("Percent") +
+  geom_text(aes(label=mean, y=mean+4), size=3.5, position = position_dodge(width=1)) + scale_fill_discrete(name="Settlement",
+                         labels=c("Rural", "Urban"))
+@
+
+<<echo=FALSE,include=FALSE>>=
+q2185_country <- opinion_country %>%
+  filter(question=="q2185") %>%
+    mutate(Percent = round(Percent,digits=0)) %>%
+  ggplot(aes(x=reorder(country,Percent), y=Percent)) + geom_bar(stat="identity",fill="#DF6E21") + coord_flip() +
+  theme_classic() + ggtitle("Complicated Politics",subtitle = "% saying they agree or strongly
+agree that politics are too complicated.") +
+  theme(plot.title = element_text(hjust = 0.5, size=25),
+        plot.subtitle = element_text(hjust = 0.5, size=14, face = "italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size=14),
+        axis.text.x = element_text(size=13)) +
+  labs(caption = "Notes: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100)) +
+  geom_text(aes(label=Percent), nudge_y = 3, size=5)
+@
+
+<<echo=FALSE,include=FALSE>>=
+q404_country <- opinion_country %>%
+  filter(question=="q404") %>%
+  mutate(Percent = round(Percent,digits=0)) %>%
+  ggplot(aes(x=reorder(country,Percent), y=Percent)) + geom_bar(stat="identity",fill="#DF6E21") + coord_flip() +
+  theme_classic() + ggtitle("Interest in Politics",subtitle = "% saying they are interested
+or very interested in politics.") +
+  theme(plot.title = element_text(hjust = 0.5, size=25),
+        plot.subtitle = element_text(hjust = 0.5, size=14, face = "italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size=14),
+        axis.text.x = element_text(size=14)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100)) +
+  geom_text(aes(label=Percent), nudge_y = 3, size=5)
+@
+
+<<echo=FALSE,include=FALSE>>=
+q409_country <- opinion_country %>%
+  filter(question=="q409") %>%
+  mutate(Percent = round(Percent,digits=0)) %>%
+  ggplot(aes(x=reorder(country,Percent), y=Percent)) + geom_bar(stat="identity",fill="#DF6E21") + coord_flip() +
+  theme_classic() + ggtitle("Internet Usage",subtitle = "% saying they use the Internet
+at least once a week.") +
+  theme(plot.title = element_text(hjust = 0.5, size=25),
+        plot.subtitle = element_text(hjust = 0.5, size=14, face = "italic"),
+        plot.caption = element_text(size=10, hjust=0),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12)) +
+  labs(caption = "Note: Weighted estimates.
+Source: Arab Barometer V.") +
+  scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100)) +
+  geom_text(aes(label=Percent), nudge_y = 3, size=5)
+@
+
+
+\section*{Interest and Information about Politics}
+
+<<q404_trend, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q404_trend
+@
+
+\begin{figure}[H]
+\centering
+\includegraphics[height=6cm,width=6cm]{attempt-q404_trend}
+\end{figure}
+
+	\medskip
+
+	Political interest in the MENA region has experienced a noticeable decline. While the percentage of citizens saying they are interested in politics held steady at 38 percentage points from 2006 to 2013, this figure plateaued to 27 percent in 2016 and 26 percent in 2018. This drop may likely be due to fatigue post-Arab Spring in 2013 as citizens may have become apathetic towards political prospects. The bottom ranked countries - Egypt, Libya and Algeria - are experiencing prolonged political contestations even today, which may constitute a disappointing outcome for many citizens.
+
+<<q404_country, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q404_country
+@
+
+\begin{figure}[H]
+\centering
+\includegraphics[height=6cm,width=6cm]{attempt-q404_country}
+\end{figure}
+
+
+  Among countries surveyed, Palestine has the highest percentage of citizens interested in politics (35 percent) while Algeria has the lowest (19 percent). These figures remain relatively unchanged since 2016, where both countries also occupied the highest and lowest rankings respectively (with Palestine reporting 37 percent of its citizens interested in politics and Algeria 17 percent).
+
+  \medskip
+
+	When asked about their knowledge about political events in their respective nations, Palestine records the highest percentage of citizens reporting being well-informed (61 percent). However, variation between countries were substantial. Morocco has only 34 percent of its citizens saying they are well-informed about political events, while other nations had percentages ranging from 39 percent (Algeria) to 57 percent (Sudan).
+
+	\medskip
+
+<<q521a4_bar, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q521a4_bar
+@
+
+\begin{figure}[H]
+\centering
+\includegraphics[height=6cm,width=6cm]{attempt-q521a4_bar}
+\end{figure}
+
+\medskip
+
+	Although many nations report higher levels of being informed about politics, all report distinctively lower interest in politics. Ranging from a 10 percent difference (Morocco) to 28 percent difference (Sudan), MENA citizens overall claim to be more well-informed about political events but are less interested in the events themselves. This trend suggests that being more well-informed may not necessarily lead to greater reported interest in politics.
+
+\medskip
+
+<<q404_edu, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q404.edu
+@
+
+<<q521a4_edu, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q521a4.edu
+@
+
+
+\begin{figure}[H]
+\centering
+\subfloat{\includegraphics[height=6cm,width=6cm]{attempt-q404_edu}}%
+\qquad
+\subfloat{\includegraphics[height=6cm,width=6cm]{attempt-q521a4_edu}}%
+\end{figure}
+
+\medskip
+
+However, there are considerable differences for both interest and being informed about politics between education levels. Interest in politics is greater among those with higher education than those with secondary education and below in surveyed countries (except Algeria), with differences as large as 27 percent (Egypt) and as small as 1 percent (Libya). Similarly, those with higher education were more well-informed about politics than those with secondary education and below. While small differences were found in Algeria (1 percent) and Libya (5 percent), other nations saw substantial gaps of being informed about politics between education levels. Ranging from differences of 10 percent (Lebanon and Palestine) up to 31 percent (Egypt), citizens with secondary education or below are much less willing to agree that they are well-informed about politics.
+
+\medskip
+
+Across both education levels, the percentage of MENA citizens interested in politics is still lower than the percentage of citizens saying they are well-informed about politics. Among those with higher education, the gap between being well-informed about politics and being interested in politics is highest in Sudan ($\Delta$ = 28 percent) and lowest in Morocco ($\Delta$ = 11 percent). Among those with secondary education or below, the aforementioned gap is highest in Palestine ($\Delta$ = 29 percent) and lowest in Morocco ($\Delta$ = 9 percent).
+
+\medskip
+
+<<q404_age, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q404.age
+@
+
+<<q521a4_age, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q521a4.age
+@
+
+\begin{figure}[H]
+\centering
+\subfloat{\includegraphics[height=6cm,width=6cm]{attempt-q404_age}}%
+\qquad
+\subfloat{\includegraphics[height=6cm,width=6cm]{attempt-q521a4_age}}%
+\end{figure}
+
+\medskip
+
+	Less consistent patterns were found between age groups. Fewer youth reported interest in politics than their older counterparts in all but two surveyed countries (Egypt and Lebanon, where youth were more interested in politics than those above 30 years old by 6 and 1 percent respectively). Lower interest in politics among youth, however, varied from 10 percent (Palestine) to 2 percent (Libya, Morocco and Sudan).
+	
+\medskip
+
+	Similarly, being well-informed about politics is not consistent among age groups. Only in Egypt (12 percent) did a noticeable higher percentage of youth agree that they were well-informed about politics than older citizens. Similar but not substantial differences were also found among youth in Morocco (1 percent) and Yemen (1 percent). Elsewhere in the region, youth are less informed about political events than their older counterparts, with differences ranging from 12 percent (Palestine and Tunisia) to 3 percent (Algeria).
+	
+\medskip
+
+	In sum, age is a striking feature mainly in Egypt and Palestine. While Egyptian youth are more interested in politics and are more well-informed, Palestinian youth report opposite patterns. As Egypt’s political climate has been considerably turbulent in the past decade, youth may be more politically engaged due to realistic possibilities of change. Youth in Palestine, on the other hand, may be disillusioned by their country’s political stalemate that presents fewer opportunities for political advancement.
+
+\medskip
+
+\pagebreak
+
+\section*{Complicated Politics}
+
+
+<<q2185_trend, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q2185_trend
+@
+
+\begin{figure}[H]
+\centering
+\includegraphics[height=6cm,width=6cm]{attempt-q2185_trend}
+\end{figure}
+
+	\medskip
+
+Despite the unfolding of major political events in many MENA nations in the past decade, citizens have not noticeably changed their belief that politics are too complicated for them to understand. While a minor decrease in percentage of citizens saying politics is too complicated is noted in 2018 (5 percent), seven-in-ten citizens across the region have consistently agreed that politics is beyond their comprehension.
+
+\medskip
+
+<<q2185_country, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q2185_country
+@
+
+\begin{figure}[H]
+\centering
+\includegraphics[height=6cm,width=6cm]{attempt-q2185_country}
+\end{figure}
+
+	\medskip
+
+Percentage of citizens agreeing that politics are too complicated ranged from 81 percent (Yemen) to 66 percent (Algeria). Yemen's ongoing, complex civil war may possibly be a reason why its citizens find it difficult to understand political events comprehensively. Among countries also surveyed in 2016, a number had noticeably fewer citizens reporting politics are too complicated in 2018. The percentage of citizens saying they cannot understand politics reduced in Tunisia (20 percent), Morocco (9 percent) and Algeria (7 percent).
+
+\medskip
+
+
+<<q2185_edu, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q2185.edu
+@
+
+<<q2185_age, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q2185.age
+@
+
+\begin{figure}[H]
+\centering
+\subfloat{\includegraphics[height=6cm,width=6cm]{attempt-q2185_edu}}%
+\qquad
+\subfloat{\includegraphics[height=6cm,width=6cm]{attempt-q2185_age}}%
+\end{figure}
+
+\medskip
+
+No substantial differences in believing that politics are too complicated are noticeable between education levels nor age groups. Only in Egypt did considerably fewer citizens with higher education agree that politics are too complicated (11 percent). Overall, citizens across MENA experience difficulties with understanding their nations' political events regardless of education or age.
+
+\medskip
+
+\section*{Users of Social Media}
+
+
+<<q424_bar, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q424_bar
+@
+
+\begin{figure}[H]
+\centering
+\includegraphics[height=6cm,width=6cm]{attempt-q424_bar}
+\end{figure}
+
+Of the Internet users in MENA (71 percent of the region), 94 percent spend at least 2 hours a day on social media, signalling that Internet usage has become nearly synonymous with social media usage. Among Internet users, a substantial portion (45 percent) are heavy social media users (spending 5 hours and above).
+
+<<q424_edu, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q424_edu
+@
+
+<<q424_age, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q424_age
+@
+
+\begin{figure}[H]
+\centering
+\subfloat{\includegraphics[height=6cm,width=6cm]{attempt-q424_edu}}%
+\qquad
+\subfloat{\includegraphics[height=6cm,width=6cm]{attempt-q424_age}}%
+\end{figure}
+
+Among social media users, those with higher education report greater heavy usage (51 percent) compared to those with secondary education and below (41 percent). Conversely, those with secondary education and below are found to use social media slightly more moderately (2 hours in a day) than those with higher education ($\Delta$ = 7 percent). This demonstrates that education attainment may be associated with the level of social media usage particularly among heavy users.
+
+\medskip
+
+The difference in the duration of social media usage is greater between age groups. Almost six-in-ten (58 percent) of 18 to 30-year-olds report heavy usage of social media, while the same is found among only three-in-ten (32 percent) of those above 30 years old ($\Delta$ = 26 percent). Likewise, moderate usage (2 hours in a day) is more frequent among those above 30 years old than 18 to 30-year-olds ($\Delta$ = 22 percent). 
+
+<<q412a_bar, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q412a_bar
+@
+
+\begin{figure}[H]
+\centering
+\includegraphics[height=6cm,width=6cm]{attempt-q412a_bar}
+\end{figure}
+
+Among social media platforms, Facebook captures a the largest share of Internet users with 77 percent saying they are active Facebook users. Facebook usage is particularly high in Egypt (92 percent) and is similarly popular among most MENA nations. Yemen is an exception with only 36 percent of its Internet users reporting active usage of Facebook. As Facebook requires faster bandwidth connection and larger data usage, Yemen's war-stricken population may not be able to access its services.
+
+\medskip 
+
+In contrast, text-messaging service WhatsApp is more frequently used among Yemeni citizens with 46 percent of Internet users reporting active usage. This greater usage may be due to WhatsApp being easily accessible among those with low-bandwidth connections and smaller data quotas. However, WhatsApp's popularity varies greatly among MENA nations. Although widely used among Internet users in Lebanon and Morocco (90 and 87 percent respectively), WhatsApp is barely used in Tunisia (8 percent). Alternative text-messaging services, such as Short Message Service (SMS) provided by mobile network providers, may be widely used instead.
+
+<<q412a_facebook, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q412a_facebook
+@
+
+<<q412a_whatsapp, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q412a_whatsapp
+@
+
+<<q412a_youtube, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q412a_youtube
+@
+
+<<q412a_instagram, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q412a_instagram
+@
+
+<<q412a_twitter, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q412a_twitter
+@
+
+<<q412a_snapchat, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q412a_snapchat
+@
+
+\begin{figure}[H]
+\centering
+\subfloat{\includegraphics[height=6cm,width=6cm]{attempt-q412a_facebook}}%
+\qquad
+\subfloat{\includegraphics[height=6cm,width=6cm]{attempt-q412a_whatsapp}}%
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\subfloat{\includegraphics[height=6cm,width=6cm]{attempt-q412a_youtube}}%
+\qquad
+\subfloat{\includegraphics[height=6cm,width=6cm]{attempt-q412a_instagram}}%
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\subfloat{\includegraphics[height=6cm,width=6cm]{attempt-q412a_twitter}}%
+\qquad
+\subfloat{\includegraphics[height=6cm,width=6cm]{attempt-q412a_snapchat}}%
+\end{figure}
+
+YouTube and Instagram, both primarily entertainment platforms, varies in popularity among MENA Internet users. While Youtube is widely used in French-speaking Morocco (76 percent) and Algeria (73 percent), it is less used in other nations ranging from 51 percent in Egypt to 3 percent in Yemen. Instagram also receives less users overall, with usage ranging from 41 percent in Morocco to 2 percent in Yemen.
+
+\medskip
+
+Despite being hailed as an important factor in the Arab Spring, Twitter captures barely a tenth of Internet users in seven out of 11 nations surveyed. Only in Egypt (29 percent) and Lebanon (24 percent) does Twitter capture at least a quarter of Internet users. Snapchat enjoys fewer users, with only two nations (Morocco and Jordan) having two-in-ten of Internet users using the messaging application.
+
+\section*{Sources of Information for Political Events}
+
+<<q421_bar, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q421_bar
+@
+
+\begin{figure}[H]
+\centering
+\includegraphics[height=6cm,width=6cm]{attempt-q421_bar}
+\end{figure}
+
+\medskip
+
+Social media is a major source of information for citizens, rivalling traditional media and successfully outranking face-to-face conversations. When asked which primary medium is used to follow breaking news, television was still cited as the main source of information (44 percent). Social media, while at second place, also had a great share of the information market (34 percent). This finding is unsurprising given that television is controlled strictly by the state in many MENA countries and citizens may prefer less censored mediums of information. The role of social media in organizing and mobilizing citizens in Arab Spring protests may also have normalized its usage.
+
+\medskip
+
+<<q421_country, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q421_country
+@
+
+\begin{figure}[H]
+\centering
+\includegraphics[height=6cm,width=6cm]{attempt-q421_country}
+\end{figure}
+
+\medskip
+
+Stark differences in the use of social media as a primary source of information exist between nations. While 57 percent of Palestinians primarily turn to social media for information, only 21 percent of Sudanese citizens do the same. Lebanon, despite having one of the highest internet penetration rates in MENA, only has 33 percent of its citizens use social media as their primary information source. 
+
+
+<<q421_edu, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q421_edu
+@
+
+<<q421_age, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q421_age
+@
+
+\begin{figure}[H]
+\centering
+\subfloat{\includegraphics[height=6cm,width=6cm]{attempt-q421_edu}}%
+\qquad
+\subfloat{\includegraphics[height=6cm,width=6cm]{attempt-q421_age}}%
+\end{figure}
+
+\medskip
+
+Additionally, substantial difference in demographics is noticeable between primary subscribers of television and social media. A remarkably higher percentage of those with higher education than those with secondary education or below use social media as a primary source of information, with differences ranging from 47 percent (Morocco) to 12 percent (Lebanon and Sudan).
+
+\medskip
+
+Similarly, social media is used more among youth than their older counterparts. The difference in social media's role as a primary information source between those between 18-30 and those above 30 years old range between 53 percent (Morocco) to 15 percent (Lebanon). Overall, youth and highly educated individuals preferred social media to traditional sources. Morocco, in particular, stands out by having the greatest polarization between these demographic groups.
+
+\medskip
+
+<<q521a3_bar, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q521a3_bar
+@
+
+\begin{figure}[H]
+\centering
+\includegraphics[height=6cm,width=6cm]{attempt-q521a3_bar}
+\end{figure}
+
+\medskip
+
+Despite great social media uptake in the region, trust in social media varies greatly across MENA nations. While half of Lebanese citizens trust social media more than newspapers or television, only three-in-ten Yemeni citizens expressed the same. Although Lebanon is noted to have one of the most liberal television industry in the region and lower usage of social media as a primary information source, a majority find social media more trustworthy. In Yemen and Libya, trust in traditional media still prevails over trust in social media despite stricter state-controlled television networks.
+
+\medskip
+
+<<q521a3_edu, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q521a3.edu
+@
+
+<<q521a3_age, include=FALSE, echo=FALSE, fig.align='center', fig=TRUE>>=
+q521a3.age
+@
+
+\begin{figure}[H]
+\centering
+\subfloat{\includegraphics[height=6cm,width=6cm]{attempt-q521a3_edu}}%
+\qquad
+\subfloat{\includegraphics[height=6cm,width=6cm]{attempt-q521a3_age}}%
+\end{figure}
+
+\medskip
+
+Among the youth and those with higher education, trust is social media follows a similar trend as the use of social media as a primary source of information. In all surveyed nations, those with higher education have greater trust in social media than those with only secondary education or below. This difference is greatest in Morocco ($\Delta$ = 46 percent) and less so in Sudan ($\Delta$ = 2 percent). Egypt has the highest percentage of highly educated individuals trusting social media more than traditional sources (76 percent).
+
+\medskip
+
+Youth have greater trust in social media than their older peers, most notably in Morocco ($\Delta$ = 50 percent) and less so in Jordan ($\Delta$ = 6 percent). Egypt has the highest percentage of youth trusting social media more than traditional sources (70 percent).
+
+\medskip
+
+In Egypt, it is likely that both the state-monopoly of traditional media as well as the important role social media played in its Arab Spring protests contributed to the strong use and trust in social media. While Morocco may not share similar experiences, those with higher education and youth may have greater access and exposure to foreign forms of social media due to its linguistic diversity.
+
+\medskip 
+
+Thus, social media has captured a significant share of the information economy in MENA. Consistent higher usage and trust of social media among youth and those with higher education signal important shifts in how political information is distributed and consumed.
+
+\medskip
+
+\section*{Conclusion}
+
+
+While interest in politics is declining among MENA citizens, the significant use and trust of social media especially among the youth and highly educated individuals sign both opportunities and challenges for the future. On one hand, social media represents an important medium for information dissemination outside of state-controlled channels. On the other hand, social media’s open-sourced nature opens possibilities for greater polarization among political factions. Understanding these inputs will be important to navigate the way various ideologies capture support among citizens.
+
+\medskip
+
+Additionally, not all social media platforms are created equal. While the dominance of Facebook as the leading platform carries strong potential for assisting the organization and collectivization of civil groups in MENA, its role as a communication gatekeeper gives significant power to its policies and regulations.
+
+\medskip
+
+The Arab Barometer also observes substantive differences in trends of political engagement and social media usage between countries. The gap between political interest and being informed about political events denote that there is much left desired by Arab citizens. These findings suggest that the interaction between social media use and political interest is a crucial lever that calls for further investigation.
+
+
+\vfill
+\pagebreak
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\newpage
+\pagestyle{empty}
+\backgroundsetup{
+	scale=1,
+	color=black,
+	opacity=1,
+	angle=0,
+	contents={%
+		\includegraphics[width=\paperwidth,height=\paperheight]{AB_BackCover.pdf}
+	}%
+}
+\newgeometry{left=1.5in,right=1.5in,top=1in, bottom=1in}
+\pagestyle{empty}
+\vspace*{1in}
+\centering
+\textbf {\LARGE \color{white} 	\href{http://www.arabbarometer.org/about}{About Arab Barometer}} \\
+\vspace*{0.2in}
+\normalsize \color{white}{The Arab Barometer is a nonpartisan research network that provides	insights into the social, political, and economic attitudes and values of
+	ordinary citizens across the Arab world. \\
+	\vspace*{0.2in}
+	We have been conducting high-quality and reliable public opinion surveys of probability samples representative of citizens aged 18 or above in the Middle East and North Africa since 2006. Our surveys contain up to 2,400 respondents in each country. Interviews were conducted face-to-face in the respondent’s place of residence. The error margin is $\pm$3 percent. \\
+	\vspace*{0.2in}
+	The Arab Barometer is the largest repository of publicly available data on the views of men and women in the MENA region. Our findings give a voice to the needs and concerns of Arab publics. \\
+	\vspace*{0.2in}
+	Through 2019, the Arab Barometer has conducted 49 national surveys over five waves including more than 74,000 interviews in 14 Arab countries. \\
+	\vspace*{2.85in}
+	\begin{tabular}{R {2.2in} R {2in} R {2in}}
+		\Huge \color{abblue}{
+			\href{http://www.arabbarometer.org}{..........} }&
+		\Huge \color{abblueD}{\href{http://www.facebook.com/arabbarometer/}{..........} }&
+		\Huge \color{abblue}{
+			\href{https://twitter.com/arabbarometer}{..........}}\\
+	\end{tabular}
+
+\end{document}
