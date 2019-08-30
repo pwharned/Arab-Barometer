@@ -1,0 +1,65 @@
+---
+title: "Iraq Report"
+author: "Patrick Harned"
+date: "8/29/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+remove(list = ls())
+source("/Users/pharned/Google Drive/Coding/R Projects/Arab-Barometer-Wraps/Functions.R")
+abv=abv_en
+```
+
+
+
+```{r pressure, echo=FALSE}
+democracy_list=find_variable("democracy", abv)
+for(i in democracy_list){
+  name = names(val_lab(abv[[i]]))
+  name = paste(name, collapse = ", ")
+  print(name)
+  if(grepl("strongly", name)==TRUE){
+    abv[[i]]=ifelse(abv[[i]]%in%c(1,2),1,0)
+    print("Recoding ", var_lab(abv[[i]]))
+  }else if(grepl("dictatorship", name)==TRUE){
+    abv[[i]]=ifelse(abv[[i]]%in%c(6:10),1,0)
+  }else if(grepl("suitable", name)==TRUE){
+    abv[[i]]=ifelse(abv[[i]]%in%c(6:10),1,0)
+    
+  }else{
+    print(paste("Could not Recode", i, sep=" "))
+  }
+}
+
+abv=recode_country(abv)
+democracy_table =abv%>%
+  mutate_at(unlist(democracy_list), function(x){x=x*abv_en$wt})%>%
+  filter(Country=="Iraq")%>%
+  select_at(unlist(democracy_list))%>%
+  summarise_all(mean, na.rm=TRUE)%>%
+  gather(Question, Percent)%>%
+  filter(Percent<1)%>%
+  mutate(Question = str_wrap(Question, width = 25))
+democracy_table%>%
+  ggplot(aes(x=Question, y=Percent*100, fill=Question))+geom_bar(stat = "identity")+coord_flip()+theme_bw()+theme(plot.title = element_text(hjust = .5),axis.ticks = element_blank(), panel.grid = element_blank(), legend.title = element_blank(), legend.position = "bottom", legend.direction = "horizontal", axis.text.y =element_blank() )+ylab("Percent")+scale_fill_ab("mix")+ggtitle("Iraqi Outlook on Democracy")+geom_text(aes(label= round(Percent*100)), nudge_y = 1.3)
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r}
+
+ trend_data%>%
+  mutate_at(unlist(democracy_list), function(x){x=x*abv_en$wt})%>%
+  filter(Country=="Iraq")%>%
+  select_at(unlist(democracy_list))%>%
+  group_by(wave)%>%
+  summarise_all(mean, na.rm=TRUE)
+  gather(Question, Percent)%>%
+  filter(Percent<1)%>%
+  mutate(Question = str_wrap(Question, width = 25))
+
+```
+

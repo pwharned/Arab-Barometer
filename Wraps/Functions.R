@@ -1,4 +1,9 @@
 
+library(expss)
+library(haven)
+library(readxl)
+library(tidyverse)
+library(ggrepel)
 
 if(startsWith(getwd(),"C")==TRUE){
   source("C:/Users/Patrick Harned/Google Drive/Coding/R Projects/Arab-Barometer-Wraps/AB_Colors.R")
@@ -13,7 +18,7 @@ if(startsWith(getwd(),"C")==TRUE){
   labeling="/Users/pharned/Google Drive/Coding/R Projects/Captions/Captions and Titles.xlsx"
 }
 
-library(expss)
+
 
 explore = function(dataframe){
   explore = list()
