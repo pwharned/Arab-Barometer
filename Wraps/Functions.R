@@ -15,7 +15,7 @@ if(startsWith(getwd(),"C")==TRUE){
     trend_data = read_dta("/Volumes/GoogleDrive/Shared drives/Arab Barometer/AB5/Data/BBC/ABI_ABV_Trend_BBC.dta")
     abv_ara <- read_dta("/Volumes/GoogleDrive/Shared drives/Arab Barometer/AB5/Data/Release Data/ABV_Crosssectional_Data_Release_ARA.dta")
     abv_en <- read_dta("/Volumes/GoogleDrive/Shared drives/Arab Barometer/AB5/Data/Release Data/ABV_Crossectional_Data_Release_ENG.dta")
-  labeling="/Users/pharned/Google Drive/Coding/R Projects/Captions/Captions and Titles.xlsx"
+  labeling=read_xlsx("/Users/pharned/Google Drive/Coding/R Projects/Captions/Captions and Titles.xlsx", sheet = 4)
 }
 
 
