@@ -4,6 +4,7 @@ library(haven)
 library(readxl)
 library(tidyverse)
 library(ggrepel)
+library(extrafont)
 
 if(startsWith(getwd(),"C")==TRUE){
   source("C:/Users/Patrick Harned/Google Drive/Coding/R Projects/Arab-Barometer-Wraps/AB_Colors.R")
@@ -46,10 +47,7 @@ find_variable = function(string, dataframe){
   return(find_variable)
 }
 
-library(readxl)
-library(extrafont)
-library(ggrepel)
-library(extrafont)
+
 
 
 recode_country=function(dataframe){
