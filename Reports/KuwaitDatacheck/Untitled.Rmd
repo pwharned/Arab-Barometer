@@ -1,0 +1,85 @@
+---
+title: "Kuwait Data Check"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggthemes)
+library(pander)
+library(expss)
+library(haven)
+cat("\014") 
+remove(list = ls()) 
+abv <- read_dta("/Volumes/GoogleDrive/My Drive/Data/ABI_ABV_Trend_BBC.dta")
+```
+
+We are going to use principal component analysis to data check the Kuwait data. Principal comoponent analysis is a unsupervised learning technique which constructs principal components that summarise the main points of variation in a data set. My goal here is to subset a large subset of related variables, and construct principal comnponents for perhaps five countries, and then compare them to the principal components produced in the Kuwait data set for the same set of variables. Theoretically, we would expect the variation along logicallty related variables to be relatively consistent across countries, if the data is valid. If for example surveyors in Kuwait falsified data, we would expect the main points of variation to be inconsistent along the selected variables with the main points of variation along the same varibale set for other countries
+
+However first we need to construct principal components for a select set of countries and confirm that the variation along key components is what we would expect. 
+1. Step subset and variable selection
+2. Country selection
+3. Construct principal componenets.
+4. Hypothesis test principal components (not sure how this works or if it is possible)
+
+
+
+```{r cars}
+```
+
+After loading the data, I have decided to start with all the variables in the state of the economy, institutional trust, and government performance sectins. 
+
+```{r echo=FALSE}
+#first we need to subset the data set. we will create a list object containing all of the variables we want to work with. 
+
+
+ab2 = abv%>%
+  filter(country==5, wave==3|wave==5)
+
+
+###create a subsetting function
+filtered_variable=function(data,filter_variable,value){
+  filter_variable<-enquo(filter_variable)
+  data %>%
+    mutate(variable=as.numeric(ifelse(!!filter_variable==value,1,0)))%>%
+    group_by(wave)%>%
+    dplyr::summarise(question=round(mean(variable,na.rm=TRUE)*100))
+  
+}
+
+
+ab3=filtered_variable(ab2, q609, 1)
+
+
+
+
+###create a plotting function
+plot1 = function(dtaf,var1, subtitle){
+  use_labels(dtaf,{
+  ggplot(data = dtaf, aes(x=wave, y=var1)) + 
+    geom_point(stat = "identity", color ='orange', fill='orange')+ 
+    geom_text(aes(label = var1),nudge_y = 2.5)+
+    theme(axis.text.x=element_text(angle=45, hjust=1)) +
+    ggtitle(var_lab(var1), subtitle = subtitle)+ ###notice how here we call Var_lab(var1) inside the function to import the variable label as the title of the graph
+    ylab("Percent")+
+    ylim(0,100)+
+    xlim("0.5", "2")
+    theme(panel.background = element_blank())+
+    theme(plot.title = element_text(hjust=0.5),panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+    theme(axis.text.y=element_text(angle=45, hjust=1))
+})}
+
+
+
+
+plot1(ab3, ab3$question, "`subtitle")
+
+
+
+
+
+
+
+
+```

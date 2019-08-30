@@ -1,0 +1,512 @@
+dataset_test=dataset_clean[test ,]
+q2011_test = q2011[test]
+detach(dataset_clean)
+glm.fits_train=glm(q2011~q101+q104+q2043+q2185, ###fit a classifcation model, with q2011 as the
+data=dataset_clean,family=binomial, subset = train)
+glm.probs=predict(glm.fits_train,dataset_test, type=="response")
+longness=length(q2011_test)
+attach(dataset_test)
+glm.pred=rep("Don't Trust",longness)
+glm.pred[glm.probs >.5]="Trust"
+table(glm.pred,q2011_test)
+mean(glm.pred==q2011_test)
+detach(dataset_test)
+}
+classification_function(abv)
+glm.probs=predict(glm.fits_train, dataset_test, type="response")
+dataset=abv
+dataset_predictors =subset(select(dataset,predictors))##subset based on predictors
+####Removing nas
+columns <- dataset_predictors[, 1 : 7]
+columns[ columns > 90 ] <- NA
+columns[, 1 : 7] <- columns
+dataset_clean=na.omit(columns)
+attach(dataset_clean)
+train=(wave =5)
+test=(wave=3)
+dataset_test=dataset_clean[test ,]
+dataset_test=dataset_clean[ ,test]
+dataset_test=dataset_clean[ wave==5,]
+dataset_test=dataset_clean[test,]
+View(dataset_test)
+predictors=c('wave','q2011','q101','q104','q2042','q2043','q2054','q2185')
+dataset=abv
+dataset_predictors =subset(select(dataset,predictors))##subset based on predictors
+####Removing nas
+columns <- dataset_predictors[, 1 : 8]
+columns[ columns > 90 ] <- NA
+columns[, 1 : 8] <- columns
+dataset_clean=na.omit(columns)
+attach(dataset_clean)
+detach(dataset_clean)
+detach(dataset_clean)
+detach(dataset_clean)
+train=(wave =5)
+test=(wave=3)
+dataset_test=dataset_clean[test,]
+q2011_test = q2011[test]
+train=(wave==5)
+test=(wave==3)
+dataset_test=dataset_clean[test,]
+View(dataset_test)
+View(dataset_clean)
+dataset_test=dataset_clean[test,]
+View(dataset_test)
+remove(list = ls())
+dataset=abv
+abv <- read_dta("/Volumes/GoogleDrive/My Drive/Data/AB1-5 Merged English Internal_Kuwait.dta")
+dataset=abv
+dataset_predictors =subset(select(dataset,predictors))##subset based on predictors
+predictors=c('wave','q2011','q101','q104','q2042','q2043','q2054','q2185')
+dataset_predictors =subset(select(dataset,predictors))##subset based on predictors
+####Removing nas
+columns <- dataset_predictors[, 1 : 8]
+columns[ columns > 90 ] <- NA
+columns[, 1 : 8] <- columns
+dataset_clean=na.omit(columns)
+train=(wave==5)
+attach(dataset_clean)
+train=(wave==5)
+test=(wave==3)
+dataset_test=dataset_clean[test,]
+q2011_test = q2011[test]
+detach(dataset_clean)
+glm.fits_train=glm(q2011~q101+q104+q2043+q2185, ###fit a classifcation model, with q2011 as the
+data=dataset_clean,family=binomial, subset = train)
+dataset_clean=dataset_clean%>% ####codes response 1 and 2 as 1, and the rest as 0, to prepare for classification
+mutate(q2011=ifelse(q2011<3,"Trust","Don't Trust"))
+train=(wave==5)
+test=(wave==3)
+dataset_test=dataset_clean[test,]
+q2011_test = q2011[test]
+attach(dataset_clean)
+dataset_clean=dataset_clean%>% ####codes response 1 and 2 as 1, and the rest as 0, to prepare for classification
+mutate(q2011=ifelse(q2011<3,"Trust","Don't Trust"))
+train=(wave==5)
+test=(wave==3)
+dataset_test=dataset_clean[test,]
+q2011_test = q2011[test]
+detach(dataset_clean)
+detach(dataset_clean)
+glm.fits_train=glm(q2011~q101+q104+q2043+q2185, ###fit a classifcation model, with q2011 as the
+data=dataset_clean,family=binomial, subset = train)
+glm.fits_train=glm(q2011~q101+q104+q2043+q2185, ###fit a classifcation model, with q2011 as the
+data=dataset_train,family=binomial)
+dataset_train=dataset_clean[train,]
+glm.fits_train=glm(q2011~q101+q104+q2043+q2185, ###fit a classifcation model, with q2011 as the
+data=dataset_train,family=binomial)
+attach(dataset_train)
+glm.fits_train=glm(q2011~q101+q104+q2043+q2185, ###fit a classifcation model, with q2011 as the
+data=dataset_train,family=binomial)
+dataset_clean$q2011=as.factor(dataset_clean$q2011)
+train=(wave==5)
+test=(wave==3)
+dataset_test=dataset_clean[test,]
+dataset_train=dataset_clean[train,]
+remove(list = ls())
+abv <- read_dta("/Volumes/GoogleDrive/My Drive/Data/AB1-5 Merged English Internal_Kuwait.dta")
+predictors=c('wave','q2011','q101','q104','q2042','q2043','q2054','q2185')
+classification_function= function(dataset){
+dataset=abv
+dataset_predictors =subset(select(dataset,predictors))##subset based on predictors
+####Removing nas
+columns <- dataset_predictors[, 1 : 8]
+columns[ columns > 90 ] <- NA
+columns[, 1 : 8] <- columns
+dataset_clean=na.omit(columns)
+attach(dataset_clean)
+dataset_clean=dataset_clean%>% ####codes response 1 and 2 as 1, and the rest as 0, to prepare for classification
+mutate(q2011=ifelse(q2011<3,"Trust","Don't Trust"))
+dataset_clean$q2011=as.factor(dataset_clean$q2011)
+train=(wave==5)
+test=(wave==3)
+dataset_test=dataset_clean[test,]
+dataset_train=dataset_clean[train,]
+q2011_test = q2011[test]
+detach(dataset_clean)
+glm.fits_train=glm(q2011~q101+q104+q2043+q2185, ###fit a classifcation model, with q2011 as the
+data=dataset_train,family=binomial)
+glm.probs=predict(glm.fits_train, dataset_test, type="response")
+longness=length(q2011_test)
+attach(dataset_test)
+glm.pred=rep("Don't Trust",longness)
+glm.pred[glm.probs >.5]="Trust"
+table(glm.pred,q2011_test)
+mean(glm.pred==q2011_test)
+detach(dataset_test)
+}
+dataset=abv
+dataset_predictors =subset(select(dataset,predictors))##subset based on predictors
+####Removing nas
+columns <- dataset_predictors[, 1 : 8]
+columns[ columns > 90 ] <- NA
+columns[, 1 : 8] <- columns
+dataset_clean=na.omit(columns)
+attach(dataset_clean)
+search()###check the list of attached packages and data sets
+dataset_test=dataset_clean[test,]
+train=(wave==5)
+test=(wave==3)
+dataset_test=dataset_clean[test,]
+dataset_train=dataset_clean[train,]
+q2011_test = q2011[test]
+detach(dataset_clean)
+detach(dataset_clean)
+glm.fits_train=glm(q2011~q101+q104+q2043+q2185, ###fit a classifcation model, with q2011 as the
+data=dataset_train,family=binomial)
+View(dataset_train)
+dataset_clean=dataset_clean%>% ####codes response 1 and 2 as 1, and the rest as 0, to prepare for classification
+mutate(q2011=ifelse(q2011<3,"Trust","Don't Trust"))
+View(dataset_clean)
+dataset_test=dataset_clean[test,]
+View(dataset_test)
+dataset_train=dataset_clean[train,]
+View(dataset_train)
+detach(dataset_clean)
+glm.fits_train=glm(q2011~q101+q104+q2043+q2185, ###fit a classifcation model, with q2011 as the
+data=dataset_train,family=binomial)
+q2011
+View(dataset_clean)
+View(dataset_predictors)
+View(dataset_test)
+View(dataset_train)
+glm.fits_train=glm(dataset_train$q2011~q101+q104+q2043+q2185, ###fit a classifcation model, with q2011 as the
+data=dataset_train,family=binomial)
+cat("\014")
+remove(list = ls())
+abv <- read_dta("/Volumes/GoogleDrive/My Drive/Data/AB1-5 Merged English Internal_Kuwait.dta")
+search()###check the list of attached packages and data sets
+kuwait5=abv%>%
+filter(wave==5)
+predictors=c('q101','q104','q2042','q2043','q2054','q2056','q2057','q209','q2182','q2185','q201a1')
+kuwait5 =subset(select(kuwait5,predictors))
+t(colnames(kuwait5))
+####Removing nas
+columns <- kuwait5[, 1 : 12]
+columns[ columns > 90 ] <- NA
+columns[, 1 : 12] <- columns
+####Removing nas
+columns <- kuwait5[, 1 : 12]
+####Removing nas
+columns <- kuwait5[, 1 : 11]
+columns[ columns > 90 ] <- NA
+columns[, 1 : 11] <- columns
+kuwait5_clean=na.omit(columns)
+kuwait5_clean=kuwait5_clean%>% ####codes response 1 and 2 as 1, and the rest as 0, to prepare for classification
+mutate(q2011=ifelse(q2011<3,"Trust","Don't Trust"))
+kuwait5 =subset(select(kuwait5,predictors))
+t(colnames(kuwait5))
+predictors=c('wave','q101','q104','q2042','q2043','q2054','q2056','q2057','q209','q2182','q2185','q201a1')
+kuwait5 =subset(select(kuwait5,predictors))
+kuwait5=abv%>%
+filter(wave==5)
+predictors=c('wave','q101','q104','q2042','q2043','q2054','q2056','q2057','q209','q2182','q2185','q201a1')
+kuwait5 =subset(select(kuwait5,predictors))
+t(colnames(kuwait5))
+####Removing nas
+columns <- kuwait5[, 1 : 11]
+columns[ columns > 90 ] <- NA
+columns[, 1 : 11] <- columns
+kuwait5_clean=na.omit(columns)
+dataset=abv
+dataset_predictors =subset(select(dataset,predictors))##subset based on predictors
+train=(wave==5)
+test=(wave==3)
+dataset_test=dataset_predictors[test,]
+dataset_train=dataset_predictors[train,]
+dataset_test=dataset_predictors[test,]
+dataset_predictors =subset(select(dataset,predictors))##subset based on predictors
+dataset_test=dataset_predictors[test,]
+train=(wave==5)
+test=(wave==3)
+dataset_test=dataset_predictors[test,]
+train=(dataset_predictors$wave==5)
+test=(dataset_predictors$wave==3)
+dataset_test=dataset_predictors[test,]
+dataset_train=dataset_predictors[train,]
+####Removing nas from test
+columns <- dataset_test[, 1 : 8]
+columns[ columns > 90 ] <- NA
+columns[, 1 : 8] <- columns
+dataset_test=na.omit(columns)
+q2011_test = q2011[test]
+dataset_test=dataset_predictors[test,]
+View(dataset_test)
+predictors=c('wave','q2011','q101','q104','q2042','q2043','q2054','q2185')
+predictors=c('wave','q2011','q101','q104','q2042','q2043','q2054','q2185')
+dataset=abv
+dataset_predictors =subset(select(dataset,predictors))##subset based on predictors
+train=(dataset_predictors$wave==5)
+test=(dataset_predictors$wave==3)
+dataset_test=dataset_predictors[test,]
+dataset_train=dataset_predictors[train,]
+####Removing nas from test
+columns <- dataset_test[, 1 : 8]
+columns[ columns > 90 ] <- NA
+columns[, 1 : 8] <- columns
+dataset_test=na.omit(columns)
+dataset_test=dataset_test%>% ####codes response 1 and 2 as 1, and the rest as 0, to prepare for classification
+mutate(q2011=ifelse(q2011<3,"Trust","Don't Trust"))
+dataset_test$q2011=as.factor(dataset_test$q2011)
+###train
+columns <- dataset_train[, 1 : 8]
+columns[ columns > 90 ] <- NA
+columns[, 1 : 8] <- columns
+dataset_train=na.omit(columns)
+q2011_test = q2011[test]
+dataset_train=dataset_train%>% ####codes response 1 and 2 as 1, and the rest as 0, to prepare for classification
+mutate(q2011=ifelse(q2011<3,"Trust","Don't Trust"))
+dataset_train$q2011=as.factor(dataset_train$q2011)
+View(dataset_test)
+View(dataset_train)
+glm.fits_train=glm(dataset_train$q2011~q101+q104+q2043+q2185, ###fit a classifcation model, with q2011 as the
+data=dataset_train,family=binomial)
+glm.probs=predict(glm.fits_train, dataset_test, type="response")
+longness=length(q2011_test)
+attach(dataset_test)
+glm.pred=rep("Don't Trust",longness)
+glm.pred[glm.probs >.5]="Trust"
+table(glm.pred,q2011_test)
+mean(glm.pred==q2011_test)
+detach(dataset_test)
+detach(dataset_test)
+cat("\014")
+remove(list = ls())
+abv <- read_dta("/Volumes/GoogleDrive/My Drive/Data/AB1-5 Merged English Internal_Kuwait.dta")
+search()###check the list of attached packages and data sets
+kuwait5=abv%>%
+filter(wave==5)
+predictors=c('wave','q101','q104','q2042','q2043','q2054','q2056','q2057','q209','q2182','q2185','q201a1')
+kuwait5 =subset(select(kuwait5,predictors))
+t(colnames(kuwait5))
+####Removing nas
+columns <- kuwait5[, 1 : 11]
+columns[ columns > 90 ] <- NA
+columns[, 1 : 11] <- columns
+kuwait5_clean=na.omit(columns)
+kuwait5_clean=kuwait5_clean%>% ####codes response 1 and 2 as 1, and the rest as 0, to prepare for classification
+mutate(q2011=ifelse(q2011<3,"Trust","Don't Trust"))
+kuwait5_clean$q2011=as.factor(kuwait5_clean$q2011)
+glm.fits_5=glm(q2011~q101+q104+q2043+q2056+q209+q2182+q2185, ###fit a classifcation model, with q2011 as the
+data=kuwait5_clean,family=binomial)
+summary (glm.fits_5)
+remove(list = ls())
+abv <- read_dta("/Volumes/GoogleDrive/My Drive/Data/AB1-5 Merged English Internal_Kuwait.dta")
+search()###check the list of attached packages and data sets
+kuwait5=abv%>%
+filter(wave==5)
+predictors=c('wave','q101','q104','q2042','q2043','q2054','q2056','q2057','q209','q2182','q2185','q201a1')
+kuwait5 =subset(select(kuwait5,predictors))
+t(colnames(kuwait5))
+####Removing nas
+columns <- kuwait5[, 1 : 11]
+columns[ columns > 90 ] <- NA
+columns[, 1 : 11] <- columns
+kuwait5_clean=na.omit(columns)
+kuwait5_clean=kuwait5_clean%>% ####codes response 1 and 2 as 1, and the rest as 0, to prepare for classification
+mutate(q2011=ifelse(q2011<3,"Trust","Don't Trust"))
+kuwait5_clean=kuwait5_clean%>% ####codes response 1 and 2 as 1, and the rest as 0, to prepare for classification
+mutate(kuwait5_clean$q2011=ifelse(q2011<3,"Trust","Don't Trust"))
+search()###check the list of attached packages and data sets
+detach(datset_train)
+dataset_train
+search()###check the list of attached packages and data sets
+search()###check the list of attached packages and data sets
+kuwait5_clean=kuwait5_clean%>% ####codes response 1 and 2 as 1, and the rest as 0, to prepare for classification
+mutate(q2011=ifelse(q2011<3,"Trust","Don't Trust"))
+View(kuwait5_clean)
+predictors=c('wave','q2011','q101','q104','q2042','q2043','q2054','q2056','q2057','q209','q2182','q2185','q201a1')
+kuwait5 =subset(select(kuwait5,predictors))
+abv <- read_dta("/Volumes/GoogleDrive/My Drive/Data/AB1-5 Merged English Internal_Kuwait.dta")
+search()###check the list of attached packages and data sets
+kuwait5=abv%>%
+filter(wave==5)
+predictors=c('wave','q2011','q101','q104','q2042','q2043','q2054','q2056','q2057','q209','q2182','q2185','q201a1')
+kuwait5 =subset(select(kuwait5,predictors))
+t(colnames(kuwait5))
+predictors=c('wave','q2011','q101','q104','q2042','q2043','q2054','q2185')
+kuwait5 =subset(select(kuwait5,predictors))
+t(colnames(kuwait5))
+####Removing nas
+columns <- kuwait5[, 1 : 11]
+####Removing nas
+columns <- kuwait5[, 1 : 8]
+columns[, 1 : 8] <- columns
+columns[ columns > 90 ] <- NA
+columns[, 1 : 8] <- columns
+kuwait5_clean=na.omit(columns)
+kuwait5_clean=kuwait5_clean%>% ####codes response 1 and 2 as 1, and the rest as 0, to prepare for classification
+mutate(q2011=ifelse(q2011<3,"Trust","Don't Trust"))
+kuwait5_clean$q2011=as.factor(kuwait5_clean$q2011)
+glm.fits_5=glm(q2011~q101+q104+q2043+q2056+q209+q2182+q2185, ###fit a classifcation model, with q2011 as the
+data=kuwait5_clean,family=binomial)
+glm.fits_3=glm(q2011~q101+q104+q2043+q2185, ###fit a classifcation model, with q2011 as the
+data=kuwait5_clean,family=binomial)
+glm.fits_5=glm(q2011~q101+q104+q2043+q2185, ###fit a classifcation model, with q2011 as the
+data=kuwait5_clean,family=binomial)
+summary (glm.fits_5)
+contrasts(kuwait5_clean$q2011)
+glm.probs=predict(glm.fits,type="response")
+glm.probs[1:10]
+glm.probs[1:10]
+glm.probs=predict(glm.fits,type="response")
+glm.probs=predict(glm.fits_5,type="response")
+glm.probs[1:10]
+glm.pred=rep("Don't Trust" ,746)
+glm.pred=rep("Don't Trust" ,1143)
+glm.pred[glm.probs >.5]=" Trust"
+table(glm.pred ,kuwait5_clean$q2011)
+mean(glm.pred==kuwait5_clean$q2011 )
+kuwait3=abv%>%
+filter(wave==3)
+predictors=c('wave','q2011','q101','q104','q2042','q2043','q2054','q2185')
+kuwait3 =subset(select(kuwait3,predictors))
+t(colnames(kuwait3))
+####Removing nas
+columns <- kuwait3[, 1 : 7]
+columns[ columns > 90 ] <- NA
+columns[, 1 : 7] <- columns
+kuwait3_clean=na.omit(columns)
+kuwait3_clean=kuwait3_clean%>% ####codes response 1 and 2 as 1, and the rest as 0, to prepare for classification
+mutate(q2011=ifelse(q2011<3,"Trust","Don't Trust"))
+kuwait3_clean$q2011=as.factor(kuwait3_clean$q2011)
+glm.fits_3=glm(q2011~q101+q104+q2043+q2185, ###fit a classifcation model, with q2011 as the
+data=kuwait3_clean,family=binomial)
+summary (glm.fits)
+summary (glm.fits_3)
+contrasts(kuwait3_clean$q2011)
+glm.probs=predict(glm.fits_3,type="response")
+glm.probs[1:10]
+length=length(kuwait3_clean)
+glm.pred=rep("Don't Trust" ,1007)
+glm.pred[glm.probs >.5]=" Trust"
+table(glm.pred ,kuwait3_clean$q2011)
+mean(glm.pred==kuwait3_clean$q2011 )
+glm.probs=predict(glm.fits_3,type="response")
+glm.probs[1:10]
+glm.pred=rep("Don't Trust" ,1007)
+glm.pred[glm.probs >.5]=" Trust"
+table(glm.pred ,kuwait3_clean$q2011)
+length(kuwait3_clean$q2011)
+glm.probs=predict(glm.fits_3,type="response")
+glm.probs[1:10]
+glm.pred=rep("Don't Trust" ,1007)
+glm.pred[glm.probs >.5]=" Trust"
+glm.pred=rep("Don't Trust" ,1007)
+glm.pred[glm.probs >.5]=" Trust"
+glm.pred=rep("Don't Trust" ,1007)
+glm.pred=rep("Don't Trust" ,1007)
+glm.pred[glm.probs >.5]=" Trust"
+glm.probs=predict(glm.fits_3,type="response")
+glm.probs=predict(glm.fits_3,type="response")
+glm.probs_3=predict(glm.fits_3,type="response")
+glm.fits_3=glm(q2011~q101+q104+q2043+q2185, ###fit a classifcation model, with q2011 as the
+data=kuwait3_clean,family=binomial)
+View(glm.fits_3)
+View(kuwait3_clean)
+View(kuwait3)
+####Removing nas
+columns <- kuwait3[, 1 : 8]
+columns[ columns > 90 ] <- NA
+columns[, 1 : 9] <- columns
+kuwait3_clean=na.omit(columns)
+columns[, 1 : 8] <- columns
+kuwait3_clean=na.omit(columns)
+####Removing nas
+columns <- kuwait3[, 1 : 8]
+columns[ columns > 90 ] <- NA
+columns[, 1 : 8] <- columns
+kuwait3_clean=na.omit(columns)
+kuwait3_clean=kuwait3_clean%>% ####codes response 1 and 2 as 1, and the rest as 0, to prepare for classification
+mutate(q2011=ifelse(q2011<3,"Trust","Don't Trust"))
+kuwait3_clean$q2011=as.factor(kuwait3_clean$q2011)
+glm.fits_3=glm(q2011~q101+q104+q2043+q2185, ###fit a classifcation model, with q2011 as the
+data=kuwait3_clean,family=binomial)
+summary (glm.fits_3)
+contrasts(kuwait3_clean$q2011)
+glm.probs_3=predict(glm.fits_3,type="response")
+glm.probs[1:10]
+glm.pred=rep("Don't Trust" ,1007)
+glm.pred[glm.probs >.5]=" Trust"
+table(glm.pred ,kuwait3_clean$q2011)
+####Removing nas
+columns <- kuwait3[, 1 : 8]
+columns[ columns > 90 ] <- NA
+columns[, 1 : 8] <- columns
+kuwait3_clean=na.omit(columns)
+kuwait3_clean=kuwait3_clean%>% ####codes response 1 and 2 as 1, and the rest as 0, to prepare for classification
+mutate(q2011=ifelse(q2011<3,"Trust","Don't Trust"))
+kuwait3_clean$q2011=as.factor(kuwait3_clean$q2011)
+glm.fits_3=glm(q2011~q101+q104+q2043+q2185, ###fit a classifcation model, with q2011 as the
+data=kuwait3_clean,family=binomial)
+summary (glm.fits_3)
+contrasts(kuwait3_clean$q2011)
+glm.probs_3=predict(glm.fits_3,type="response")
+glm.probs[1:10]
+glm.pred=rep("Don't Trust" ,1007)
+glm.pred[glm.probs >.5]=" Trust"
+table(glm.pred ,kuwait3_clean$q2011)
+mean(glm.pred==kuwait3_clean$q2011 )
+glm.pred=rep("Don't Trust" ,1143)
+glm.pred[glm.probs >.5]=" Trust"
+table(glm.pred ,kuwait3_clean$q2011)
+mean(glm.pred==kuwait3_clean$q2011 )
+glm.pred=rep("Don't Trust" ,1143)
+glm.pred[glm.probs >.5]=" Trust"
+table(glm.pred ,kuwait3_clean$q2011)
+glm.probs_3=predict(glm.fits_3,type="response")
+glm.probs[1:10]
+glm.pred=rep("Don't Trust" ,1007)
+glm.pred[glm.probs_3 >.5]=" Trust"
+table(glm.pred ,kuwait3_clean$q2011)
+mean(glm.pred==kuwait3_clean$q2011 )
+predictors=c('wave','q2011','q101','q104','q2042','q2043','q2054','q2185')
+dataset=abv
+dataset_predictors =subset(select(dataset,predictors))##subset based on predictors
+train=(dataset_predictors$wave==5)
+test=(dataset_predictors$wave==3)
+dataset_test=dataset_predictors[test,]
+dataset_train=dataset_predictors[train,]
+####Removing nas from test
+columns <- dataset_test[, 1 : 8]
+columns[ columns > 90 ] <- NA
+columns[, 1 : 8] <- columns
+dataset_test=na.omit(columns)
+q2011_test = q2011[test]
+dataset_test=dataset_test%>% ####codes response 1 and 2 as 1, and the rest as 0, to prepare for classification
+mutate(q2011=ifelse(q2011<3,"Trust","Don't Trust"))
+dataset_test$q2011=as.factor(dataset_test$q2011)
+###train
+columns <- dataset_train[, 1 : 8]
+columns[ columns > 90 ] <- NA
+columns[, 1 : 8] <- columns
+dataset_train=na.omit(columns)
+q2011_test = q2011[test]
+dataset_train=dataset_train%>% ####codes response 1 and 2 as 1, and the rest as 0, to prepare for classification
+mutate(q2011=ifelse(q2011<3,"Trust","Don't Trust"))
+dataset_train$q2011=as.factor(dataset_train$q2011)
+glm.fits_train=glm(dataset_train$q2011~q101+q104+q2043+q2185, ###fit a classifcation model, with q2011 as the
+data=dataset_train,family=binomial)
+glm.probs=predict(glm.fits_train, dataset_test, type="response")
+longness=length(q2011_test)
+attach(dataset_test)
+glm.pred=rep("Don't Trust",longness)
+glm.pred[glm.probs >.5]="Trust"
+table(glm.pred,q2011_test)
+mean(glm.pred==q2011_test)
+detach(dataset_test)
+longness=length(glm.probs)
+attach(dataset_test)
+glm.pred=rep("Don't Trust",longness)
+glm.pred[glm.probs >.5]="Trust"
+table(glm.pred,q2011_test)
+longness=length(glm.pred)
+attach(dataset_test)
+glm.pred=rep("Don't Trust",longness)
+glm.pred[glm.probs >.5]="Trust"
+table(glm.pred,q2011_test)
+mean(glm.pred==q2011_test)
+detach(dataset_test)
+remove(list = ls())
+abv <- read_dta("/Volumes/GoogleDrive/My Drive/Data/AB1-5 Merged English Internal_Kuwait.dta")
+search()###check the list of attached packages and data sets

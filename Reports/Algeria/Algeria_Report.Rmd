@@ -1,0 +1,243 @@
+---
+title: "Algeria_report_arabic"
+author: "Patrick Harned"
+date: "8/21/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(grid)
+library(haven)
+library(expss)
+library(readxl)
+library(sjlabelled)
+
+if(startsWith(getwd(),"C")==TRUE){
+      abv <- read_dta("G:/Shared drives/Arab Barometer/AB5/Data/Release Data/ABV_Crosssectional_Data_Release_ARA.dta")
+      trend_data <- read_dta("G:/Shared drives/Arab Barometer/AB1-4/ABI_ABV_Trend_File.dta")
+labeling = read_xlsx("C:/Users/Patrick Harned/Google Drive/Coding/R Projects/Captions/Captions and Titles.xlsx", sheet=4)
+          out_path = "C:/Users/Patrick Harned/Google Drive/Coding/R Projects/Algeria/Algeria_Report_arabic"
+      source("C:/Users/Patrick Harned/Google Drive/Coding/R Projects/Arab-Barometer-Wraps/Functions.R")
+    }else{
+    out_path = "/Users/pharned/Google Drive/Coding/R Projects/Algeria/Algeria_Report_arabic"
+    trend_data = read_dta("/Volumes/GoogleDrive/Shared drives/Arab Barometer/AB5/Data/BBC/ABI_ABV_Trend_BBC.dta")
+    labeling = read_xlsx("/Users/pharned/Google Drive/Coding/R Projects/Captions/Captions and Titles.xlsx", sheet=4) ##import arabic language 
+     source("/Users/pharned/Google Drive/Coding/R Projects/Arab-Barometer-Wraps/Functions.R")
+      abv <- read_dta("/Volumes/GoogleDrive/Shared drives/Arab Barometer/AB5/Data/Release Data/ABV_Crosssectional_Data_Release_ARA.dta")
+    }
+
+
+
+library(tidyverse)
+library(survey)
+
+variable_list= c("Q101", "Q102", "Q104", "Q511")
+```
+
+
+
+```{r}
+
+algeria_trend= trend_data%>%
+  mutate(Q101= ifelse(q101%in%c(1,2), 1,0), Q102=ifelse(q102%in%c(1,2),1,0))%>%
+  mutate(Q104= ifelse(q104%in%c(1:4)&wave%in%c(1:3),1,ifelse(q104==1&wave%in%c(4:5),1,0)))%>%
+  mutate(Q511=ifelse(q511%in%c(6:10),1,0))%>%
+  mutate_at(variable_list, function(x){x=x*trend_data$wt})%>%
+  filter(country==1)%>%
+  group_by(wave)%>%
+  summarise_at(variable_list,mean,na.rm=TRUE)%>%
+  mutate_at(variable_list,function(x){x=x*100})
+
+plot_function = function(var){
+  variable = algeria_trend[[var]]
+  print(var)
+  titling = labeling[[var]]
+  plot_title=paste(titling[4])
+  subtitle = paste(titling[5])
+  variable = enquo(variable)
+  ggplot(algeria_trend, aes(x=wave, y= !!variable))+geom_line(stat = "identity", color=ab_cols("light blue 2"))+geom_point(color= ab_cols("light blue 3"))+ylim(0,100)+ggtitle(paste(var,str_wrap(plot_title, width = 50), sep = "\n"), subtitle = subtitle)+theme_bw()+theme(panel.border = element_rect(colour = "black", 
+                                      fill=NA, size=.6),
+          plot.caption = element_text(hjust = 0, size = 12),plot.subtitle = element_text(face = "italic", size = 14, hjust = .5),plot.title = element_text(size=20, hjust=0.5), axis.text.y = element_text(angle = 45),
+          panel.grid.major = element_blank(), panel.grid.minor = element_blank())+geom_text_repel(aes(label=round(!!variable)))+xlab("السنة")+ylab("النسبة")+scale_x_discrete(limits=c("1"="2006-07","2"="2010-11","3"="2012-14","4"="2016-17","5"="2018-19"))
+    
+    
+    
+    
+}
+
+
+
+plot_list = map(variable_list, ~plot_function(.x))
+
+
+for(i in seq(plot_list)){
+  plot = plot_list[[i]]
+  variable_name = variable_list[[i]]
+  print(plot)
+  filename= paste(variable_name,".png", sep = "_")
+  print(filename)
+  ggsave(filename = filename,plot=plot, width= 7, height=7, device = "png", path = out_path)
+}
+
+plot_list
+
+###pie chart ##load arabic data
+
+##abv <- read_dta("G:/Shared drives/Arab Barometer/AB5/Data/Release Data/ABV_Crosssectional_Data_Release_ARA.dta")
+
+algeria_bbv=abv%>%
+  filter(wave==5, country==1)%>%
+  mutate(Q2061A= ifelse(Q2061A%in%c(3,6,8,15),15,Q2061A))%>%
+  mutate(Q2061A = ifelse(Q2061A%in%c(98,99),98, Q2061A))
+
+algeria_5_design= svydesign(ids = ~id, weights = ~wt,strata = ~stratum,data = algeria_bbv,nest = TRUE)
+
+
+test_table = svytable(~Q2061A, design= algeria_5_design)%>%
+  as.data.frame()%>%
+  mutate(Q2061a = Freq/sum(Freq))%>%
+  mutate(Q2061a=Q2061a*100)%>%
+  mutate(Labels = Q2061A)%>%
+  add_labels(Q2061A,labels = val_lab(abv$Q2061A))%>%
+  group_by(Q2061A) %>% 
+  mutate(Q2061a=round(Q2061a))
+
+  sequence = c(1,2,5,4,8,7,3,11,13)
+  for (i in seq_along(sequence)) {
+    if(test_table$Labels[i]==test_table$Labels[i]){
+      test_table$Labels=ifelse(test_table$Labels==test_table$Labels[i],names(val_lab(test_table$Q2061A))[sequence[i]],test_table$Labels)
+      
+    }
+    
+  }
+
+Q206_plot=   ggplot(test_table,aes(x="",y=Q2061a,fill=Q2061A,))+geom_col(position = position_stack(reverse = TRUE))+scale_fill_ab("pie", reverse = TRUE, labels = test_table$Labels)+ggtitle(str_wrap(labeling[["Q2061A"]][4], width = 50), subtitle = labeling[["Q2061A"]][5])+theme_minimal() +
+    theme(axis.title.x = element_blank(), legend.title = element_blank(), plot.subtitle = element_text(hjust = .5, size = 14, face = "italic"), plot.title = element_text(hjust =.5, size = 20),panel.grid = element_blank(),panel.border = element_blank(),legend.text = element_text(size = 12), axis.ticks = element_blank(), legend.position = "bottom", panel.grid.minor = element_blank(), axis.text.x = element_blank(), panel.grid.major = element_blank(),legend.key.size = unit(0.3, "cm"))+xlab("")+geom_text(aes(y=Q2061a/2+c(0, cumsum(Q2061a)[-length(Q2061a)]), label = Q2061a),size= 5,colour="white")+coord_polar("y", start = 0)
+
+  ggsave(filename = "Q206.png", plot = Q206_plot, width= 7, height=7,device = "png", path = out_path)
+
+
+  ####age graph
+  
+  Q104_age = abv%>%
+    filter(country==1)%>%
+    mutate(Age= ifelse(Q1001%in%c(18:29),"18-29",ifelse(Q1001%in%c(30:39),"30-39",ifelse(Q1001%in%c(40:49),"40-49",ifelse(Q1001%in%c(50:150),"50+",0)))))%>%
+    mutate(Education = ifelse(Q1003%in%c(1:3), "تعليم اساسي", ifelse(Q1003%in%c(4,5), "تعليم ثانوي",ifelse(Q1003%in%c(6,7),"تعليم عالي", 0))))%>%
+    mutate(Q104= ifelse(Q104==1,1,0))
+   
+  
+  
+  
+  
+  Q104_design = svydesign(ids = ~id, weights = ~wt, strata = ~stratum, data = Q104_age,nest = TRUE)
+  
+  
+  q104_age_table = svytable(~Q104+Age, design= Q104_design)%>%
+    as.data.frame()%>%
+    group_by(Age)%>%
+    mutate(Prop= Freq/sum(Freq)*100)%>%
+    filter(Q104!=0, Age!=0)
+
+  q104_education_table = svytable(~Q104+Education, design= Q104_design)%>%
+    as.data.frame()%>%
+    group_by(Education)%>%
+    mutate(Prop= Freq/sum(Freq)*100)%>%
+    filter(Q104!=0, Education!=0)
+
+Q211b_table = svytable(~Q211B, design= Q104_design)%>%
+    as.data.frame()%>%
+    mutate(Prop= Freq/sum(Freq)*100)%>%
+  add_labels(Q211B, labels = val_lab(abv$Q211B))
+  
+
+Q211c_table = svytable(~Q211C, design= Q104_design)%>%
+    as.data.frame()%>%
+    mutate(Prop= Freq/sum(Freq)*100)%>%
+  mutate(Q211C= as.factor(Q211C))%>%
+  add_labels(Q211C, labels = val_lab(abv$Q211C))
+
+Q104_age_plot = plotting_function(q104_age_table,Age,Prop, color = ab_cols("light blue 4"), title = "Q104")
+
+ggsave(filename = "Q104_age.png", plot = Q104_age_plot, width= 7, height=7,device = "png", path = out_path)
+
+Q104_education_plot = plotting_function(q104_education_table, Education, Prop, color = ab_cols("light orange 2"), title = "Q104")
+
+ggsave(filename = "Q104_education.png", plot = Q104_education_plot,width= 7, height=7, device = "png", path = out_path)
+
+
+Q211b_plot = plotting_function(Q211b_table, Q211B, Prop, color = ab_cols("light blue 1"), title = "Q211B")+scale_x_discrete(labels=rev(names(val_lab(Q211b_table$Q211B))))+theme(plot.subtitle = element_blank())
+
+ggsave(filename = "Q211b.png", plot = Q211b_plot,width= 7, height=7, device = "png", path = out_path)
+
+Q211c_plot= plotting_function(Q211c_table, Q211C, Prop, color = ab_cols("light blue 1"), title = "Q211C")+scale_x_discrete(labels=factor(rev(names(val_lab(abv$Q211C)))))+theme(plot.margin=margin(.5,.5,.5,.5, unit = "cm"), plot.subtitle = element_blank())
+
+ggsave(filename = "Q211c.png", plot = Q211c_plot,width= 7, height=7, device = "png", path = out_path)
+
+
+variable_list2 = c("Q204_11","Q204_3","Q204_2","Q204_20")
+Q204_table = abv%>%
+  mutate_at(variable_list2, function(x){x=ifelse(x%in%c(1,2),1,0)})%>%
+  select(variable_list2, wt, country)%>%
+  mutate_at(variable_list2, function(x){x*abv$wt})%>%
+  filter(country==1)%>%
+  summarise_at(variable_list2, function(x){mean(x, na.rm=TRUE)*100})%>%
+  gather(Question, Percent)%>%
+  rowid_to_column()%>%
+  mutate(Label=ifelse(rowid==1,labeling[["Q204"]][7], ifelse(rowid==2,labeling[["Q204"]][10], ifelse(rowid==3, labeling[["Q204"]][9], ifelse(rowid==4,labeling[["Q204"]][8],0)))))
+
+
+Q204_plot = colored_bar_plot(Q204_table, Question, Percent, title = "Q204")+theme(legend.position = "top", legend.direction = "horizontal",legend.margin=margin(t = 0, unit='cm'))
+ggsave(filename = "Q204.png", plot = Q204_plot, width= 7, height=7,device = "png", path = out_path)
+
+
+variable_list3=c("Q606_2","Q606_3","Q606_4")
+
+Q606_table = abv%>%
+  mutate_at(variable_list3, function(x){x=ifelse(x%in%c(1,2),1,0)})%>%
+  select(variable_list3, wt, country)%>%
+  mutate_at(variable_list3, function(x){x*abv$wt})%>%
+  filter(country==1)%>%
+  summarise_at(variable_list3, function(x){mean(x, na.rm=TRUE)*100})%>%
+  gather(Question, Percent)%>%
+  rowid_to_column()%>%
+  mutate(Label=ifelse(rowid==1,labeling[["Q606"]][6], ifelse(rowid==2,labeling[["Q606"]][7], ifelse(rowid==3, labeling[["Q606"]][8],0))))
+
+
+Q606_plot = colored_bar_plot(Q606_table, x= Question, y= Percent, "Q606")+theme(legend.position = "bottom", legend.direction = "vertical",plot.title = element_text(size=20), legend.text = element_text(size = 16))
+ggsave(filename = "Q606.png", plot = Q606_plot,width= 7, height=7, device = "png", path = out_path)
+
+
+listlist = c()
+for(i in c(1:4,8,9,12,13)){
+  listlist[i]=paste("Q700A",i,sep = "_")
+}
+listlist=na.omit(listlist)
+
+label_list_2=c()
+new_list=c()
+for (i in listlist){
+  name = abv[[i]]
+  temp = paste(var_lab(name))
+  trytry= unlist(strsplit(temp,"[:]"))[3]
+  print(trytry)
+  new_list[i]=trytry
+  remove(temp)
+}
+
+Q700_table = abv%>%
+  mutate_at(listlist, function(x){x=ifelse(x%in%c(1),1,0)})%>%
+  select(listlist, wt, country)%>%
+  mutate_at(listlist, function(x){x*abv$wt})%>%
+  filter(country==1)%>%
+  summarise_at(listlist, function(x){mean(x, na.rm=TRUE)*100})%>%
+  gather(Question, Percent)%>%
+  rowid_to_column()%>%
+  mutate(Label=new_list)
+
+Q700_plot = colored_bar_plot(Q700_table, x= Question, y= Percent, "Q700")
+
+ggsave(filename = "Q700.png", plot = Q700_plot, width = 7, height = 7, device = "png", path = out_path)
+```
+
+

@@ -1,0 +1,86 @@
+---
+title: "Algeria Plots"
+output: html_document
+author: "Patrick Harned"
+date: "8/5/2019"
+always_allow_html: yes
+---
+
+
+We need Q104(age gender education), Q101, Q102, Q104A(pie chart), Q204, Q104 Trend, Q2118, Q211C Q511 Q606, Q700A, Q206!A(pie) Q20161b(pie) 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(haven)
+rm(list=ls())
+library(plotly)
+library(tidyverse)
+library(expss)
+library(scales)
+library(readxl)
+library(grid)
+pathname="/Volumes/GoogleDrive/My Drive/Coding/R Projects/Captions/Captions and Titles.xlsx"
+
+labeling = read_xlsx(pathname, sheet=4) ##import arabic language labels from an excel sheet. this is to ensure 
+
+abv_trend = read_dta('/Volumes/GoogleDrive/Shared drives/Arab Barometer/AB5/Data/BBC/ABI_ABV_Trend_BBC.dta')
+##abv1 = read_dta('/Volumes/GoogleDrive/Shared drives/Arab Barometer/AB5/Data/Release Data/ABV_Crossectional_Data_Release_ENG.dta')
+
+abv_trend$country=as.character(abv_trend$country)
+abv_trend$country= dplyr::recode(abv_trend$country, '1'="Algeria",'5'="Egypt",'7' = "Iraq", '8'="Jordan",'9'="Kuwait", '10'="Lebanon",'11'="Libya", '13'="Morocco",'15'="Palestine",'19'="Sudan",'21'="Tunisia",'22'="Yemen")
+abv_trend$wave=as.character(abv_trend$wave)
+abv_trend$wave=dplyr::recode(abv_trend$wave,"1"="2006","2"="2011","3"="2013","4"="2016","5"="2019")
+```
+
+After loading my data I need to do some cleaning and recoding. First thing I like to do is just subset the data set based on the variables I am working with then I need to take a look at the labels so that I know how to recode them. 
+
+```{r setup, include=FALSE}
+
+variable_list = c("q104", "q102", "q104A", "q204", "q2118","q211C", "q511", "q606", "q700A", "q2061A", "q2061B")
+
+for (variable in variable_list) {
+  variable = abv_trend[[variable]]
+  print(val_lab(variable))
+  
+}
+
+algeria = abv_trend%>%
+  filter(country=="Algeria")%>%
+  select(variable_list)%>%
+  mutate(q101=ifelse(q101%in%c(1,2), 1,0), q101=q101*wt, )%>%
+  group_by(wave)%>%
+  summarise_all(mean)
+```
+
+
+```{r setup, include=FALSE}
+ploter= function(data,variable) {ggplot(data = data,aes(x=wave, y=variable, group=1))+geom_line(aes(group=1))+theme_bw()+theme(legend.title  = element_blank(), legend.position = "bottom", legend.direction = "horizontal",axis.text.y = element_text(angle = 45),panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +scale_fill_manual(values=c('#2096BA','#21718A')) +xlab("Country")+ylab("Wave")+ theme(plot.margin = unit(c(1,1,1,1), "cm"),axis.title.y  = element_text(vjust=-0.5))}
+
+               
+               
+ploter= ggplot(data = algeria,aes(x=reorder(wave,+q101), y=q101)+geom_col(position = "dodge")+ coord_flip()+theme_bw()+theme(legend.title  = element_blank(), legend.position = "bottom", legend.direction = "horizontal",axis.text.y = element_text(angle = 45),panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +scale_fill_manual(values=c('#2096BA','#21718A')) +xlab("Country")+ylab("Percent")+ theme(plot.margin = unit(c(1,1,1,1), "cm"),axis.title.y  = element_text(vjust=-0.5)) 
+              
+
+
+ploter
+label = strwrap(labeling[[2,"Q521A_3"]], width=60)
+
+ R521A_3_plot=ggplotly(ploter)%>%add_annotations(
+    x= 0.5,
+    y= 1.15,
+    xref = "paper",
+    yref = "paper",
+    text = label[1],
+    showarrow = F
+  )%>%add_annotations(
+    x= 0.5,
+    y= 1.1,
+    xref = "paper",
+    yref = "paper",
+    text = label[2],
+    showarrow = F)
+
+R521A_3_plot
+orca(R521A_3_plot, "R521A_3_plot.jpeg")
+```
+
+
