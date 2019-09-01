@@ -1,19 +1,22 @@
 library(srvyr)
+library(tidyverse)
 abv_en1=recode_country(abv_en)
 
 test1= abv_en1%>%
   mutate(Q404=ifelse(Q404%in%c(1,2),1,0))%>%
   mutate(Age= ifelse(Q1001%in%c(18:29), "18-29",ifelse(Q1001%in%c(30:120),"30+", NA)))%>%
+  mutate(Education = ifelse(Q1003%in%c(1:4), "Max Secondary", ifelse(Q1003%in%c(6,7), "Max higher", NA)))%>%
   filter(!is.na(wt),!is.na(id))%>%
-  mutate(Q421=ifelse(Q421==6, 1, 0))%>%
-  group_by(Country, Age)%>%
-  summarise_at(c("Q404","Q421"),list(~weighted.mean(., w=wt, na.rm = TRUE)))%>%
+  mutate(Q421=ifelse(Q421==6, 1, 0))
+ 
+ group_by(Country, Age)
+  summarise_at(c("Q404","Q421"),list(~weighted.mean(., w=wt, na.rm = TRUE)))
   filter(!is.na(Age))
 
 
-plotterizer = function(dataframe, x, fill=NA,  pallette=NULL){
-  legend_title=fill
+plotterizer = function(dataframe, x, fill = fill,pallette=NULL){
   fill=dataframe[[fill]]
+  legend_title=names(dataframe)[[2]]
   title1 = short_title(x)
   subtitle = subtitle_function(x)
   variable = dataframe[[x]]
@@ -39,6 +42,26 @@ plotterizer = function(dataframe, x, fill=NA,  pallette=NULL){
 
 variable_kist= c("Q421", "Q404")
 
+variable_kist = lapply(variable_kist,sym)
+
+grouping_function=function(dataframe, x){
+
+  print(x)
+  dataframe%>%
+    group_by(Country, !!x)%>%
+    summarise_at(c("Q404","Q421"),list(~weighted.mean(., w=wt, na.rm = TRUE)))%>%
+    filter(!is.na(!!x))
+}
+
+by_variables = c(sym("Age"),sym("Education"))
 
 
-map(variable_kist,~plotterizer(dataframe=test1,x=.x, pallette = "mix", fill = "Age"))
+summaries = map(by_variables, ~grouping_function(dataframe = test1, x=.x))
+ 
+##lets figure out later how to add names to the elements of the list
+
+map(summaries,~ map(variable_kist, ~ plotterizer(dataframe = .y,x=.x, fill = "Age", pallette = "mix"),.y=.x))####wor
+
+
+map(variable_kist, ~ plotterizer(dataframe = summaries[[1]],x=.x, fill = "Age", pallette = "mix"))####wor
+

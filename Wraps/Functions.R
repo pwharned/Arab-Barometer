@@ -13,11 +13,21 @@ if(startsWith(getwd(),"C")==TRUE){
   trend_data <- read_dta("G:/Shared drives/Arab Barometer/AB1-4/ABI_ABV_Trend_File.dta")
   }else{
     source("/Users/pharned/Google Drive/Coding/R Projects/Arab-Barometer-Wraps/AB_Colors.R")
-    trend_data = read_dta("/Volumes/GoogleDrive/Shared drives/Arab Barometer/AB5/Data/BBC/ABI_ABV_Trend_BBC.dta")
-    abv_ara <- read_dta("/Volumes/GoogleDrive/Shared drives/Arab Barometer/AB5/Data/Release Data/ABV_Crosssectional_Data_Release_ARA.dta")
-    abv_en <- read_dta("/Volumes/GoogleDrive/Shared drives/Arab Barometer/AB5/Data/Release Data/ABV_Crossectional_Data_Release_ENG.dta")
-  labeling=read_xlsx("/Users/pharned/Google Drive/Coding/R Projects/Captions/Captions and Titles.xlsx", sheet = 4)
-}
+    labeling=read_xlsx("/Users/pharned/Google Drive/Coding/R Projects/Captions/Captions and Titles.xlsx", sheet = 4)
+    for (i in map(c("trend_data","abv_en","abv_ara"), exists)){
+      if(i==FALSE){
+        ##check if data is present, if it isnt, load the data.
+      trend_data = read_dta("/Volumes/GoogleDrive/Shared drives/Arab Barometer/AB5/Data/BBC/ABI_ABV_Trend_BBC.dta")
+      abv_ara <- read_dta("/Volumes/GoogleDrive/Shared drives/Arab Barometer/AB5/Data/Release Data/ABV_Crosssectional_Data_Release_ARA.dta")
+      abv_en <- read_dta("/Volumes/GoogleDrive/Shared drives/Arab Barometer/AB5/Data/Release Data/ABV_Crossectional_Data_Release_ENG.dta")
+    } else{
+      trend_data=trend_data
+      abv_ara=abv_ara
+      abv_en = abv_en
+    } ###if they are loaded, refresh the data frames
+      
+    }
+  }
 
 
 
