@@ -1,0 +1,145 @@
+---
+title: "ModelSyntax"
+knit: (function(input_file, encoding) {
+  out_dir <- 'docs';
+  rmarkdown::render(input_file,
+ encoding=encoding,
+ output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+In this document I am using AB Survey data to build random forests that predict support for the government based on a small number of related variables. I'll demonstrate below how I use functional programming methods in R to split the data set into test/training/validation, and iterativey construct models across all the different countries for which we have survey data. 
+
+```{r}
+library(tidyverse)
+library(haven)
+remove(list = ls()) 
+
+abv1= read_dta("/Volumes/GoogleDrive/Shared drives/Arab Barometer/AB5/Data/Release Data/ABV_Crossectional_Data_Release_ENG.dta")
+variable_list = c("Q100","Q2061A","Q101","Q101A","Q102","Q513","country")
+
+data1= abv1%>%
+  select(variable_list)%>%
+  as.data.frame()
+data1[is.na(data1)]=0
+  data1=data1%>%
+    as_tibble()
+
+nested_data = data1%>%
+  group_by(country)%>%
+  nest()
+```
+
+In the first step I loaded up the data and subsetted based on a set of variables which includes the outcoome variable (Q513) which asks respondents whether they are satisfied with the governments overall performance, rating it on a scale of 1-10. Then I will use a subset of related questions (i'll add descriptions later).
+
+The tricky part is segmenting the data by country so that I can get a large number of unique models iteratively for each country. First I nest the data by country, then I use map and initial_split from the rsample package to iteratively create an initial split in each individual country dataframe. Then I map again to extract the training and testing data. 
+
+```{r}
+library(rsample)
+
+set.seed(42)
+
+abv_split = nested_data%>%
+  mutate(split=map(data, ~initial_split(.x, prop = .75)))
+
+abv_split=initial_split(data1, prop = .75)
+training_data=map(abv_split$split, ~training(.x))
+testing_data=map(abv_split$split, ~testing(.x))
+
+
+```
+
+
+```{r}
+set.seed(42)
+
+# Prepare the dataframe containing the cross validation partitions
+cv_split <- vfold_cv(training_data, v = 5)
+
+cv_data <- cv_split %>% 
+  mutate(
+    # Extract the train dataframe for each split
+    train = map(splits, ~training(.x)), 
+    # Extract the validate dataframe for each split
+    validate = map(splits, ~testing(.x))
+  )
+
+# Use head() to preview cv_data
+head(cv_data)
+
+
+library(ranger)
+
+# Build a random forest model for each fold
+cv_models_rf <- cv_data %>% 
+  mutate(model = map(train, ~ranger(formula = Q513~., data = .x,
+                                    num.trees = 100, seed = 42)))
+                                    
+# Generate predictions using the random forest model
+cv_prep_rf <- cv_models_rf %>% 
+  mutate(validate_predicted = map2(.x = model, .y = validate, ~predict(.x, .y)$predictions))%>%
+  mutate(validate_actual = map(validate, ~.x$Q513))
+
+library(Metrics)
+# Calculate validate MAE for each fold
+cv_eval_rf <- cv_prep_rf %>% 
+  mutate(validate_mae = map2_dbl(validate_actual, validate_predicted, ~mae(actual = .x, predicted = .y)))
+
+# Print the validate_mae column
+cv_eval_rf$validate_mae
+
+# Calculate the mean of validate_mae column
+mean(cv_eval_rf$validate_mae)
+
+
+# Tune cross validation folds by varying mtry
+cv_tune <- cv_data %>% 
+  crossing(mtry = 2:5) 
+
+# Build a model for each fold & mtry combination
+cv_model_tunerf <- cv_tune %>% 
+  mutate(model = map2(.x = train, .y = mtry, ~ranger(formula = Q513~., 
+                                           data = .x, mtry = .y, 
+                                           num.trees = 100, seed = 42)))
+
+
+# Generate validate predictions for each model
+cv_prep_tunerf <- cv_model_tunerf %>% 
+  mutate(validate_predicted = map2(.x = model, .y = validate, ~predict(.x, .y)$predictions))%>%
+  mutate(validate_actual = map(validate, ~.x$Q513))
+
+# Calculate validate MAE for each fold and mtry combination
+cv_eval_tunerf <- cv_prep_tunerf %>% 
+  mutate(validate_mae = map2_dbl(.x = validate_actual, .y = validate_predicted, ~mae(actual = .x, predicted = .y)))
+
+# Calculate the mean validate_mae for each mtry used  
+cv_eval_tunerf %>% 
+  group_by(mtry) %>% 
+  summarise(mean_mae = mean(validate_mae))
+
+
+
+# Build the model using all training data and the best performing parameter
+best_model <- ranger(formula = Q513~., data = training_data,
+                     mtry = 2, num.trees = 100, seed = 42)
+
+# Prepare the test_actual vector
+test_actual <- testing_data$Q513
+
+# Predict life_expectancy for the testing_data
+test_predicted <- predict(best_model, testing_data)$predictions
+
+# Calculate the test MAE
+mae(test_actual, test_predicted)
+
+```
+
+Unfortunately the random forest did not perform well, since government performance is on a scale of 1-10, and MAE of 4 is not much better than guessing. However, in the future we will work to modify the feature set to build a better model, and potentiall explore PCA/Factor analysis. 
+
+
+
+
