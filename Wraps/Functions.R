@@ -14,20 +14,17 @@ if(startsWith(getwd(),"C")==TRUE){
   }else{
     source("/Users/pharned/Google Drive/Coding/R Projects/Arab-Barometer-Wraps/AB_Colors.R")
     labeling=read_xlsx("/Users/pharned/Google Drive/Coding/R Projects/Captions/Captions and Titles.xlsx", sheet = 4)
-    for (i in map(c("trend_data","abv_en","abv_ara"), exists)){
-      if(i==FALSE){
+    while(sum(map_lgl(c("trend_data","abv_en","abv_ara"), exists))<3){
         ##check if data is present, if it isnt, load the data.
       trend_data = read_dta("/Volumes/GoogleDrive/Shared drives/Arab Barometer/AB5/Data/BBC/ABI_ABV_Trend_BBC.dta")
       abv_ara <- read_dta("/Volumes/GoogleDrive/Shared drives/Arab Barometer/AB5/Data/Release Data/ABV_Crosssectional_Data_Release_ARA.dta")
       abv_en <- read_dta("/Volumes/GoogleDrive/Shared drives/Arab Barometer/AB5/Data/Release Data/ABV_Crossectional_Data_Release_ENG.dta")
-    } else{
+    } 
       trend_data=trend_data
       abv_ara=abv_ara
       abv_en = abv_en
-    } ###if they are loaded, refresh the data frames
-      
+     ###if they are loaded, refresh the data frames
     }
-  }
 
 
 
@@ -76,7 +73,7 @@ recode_country=function(dataframe){
 title_function= function (variable){
   title = c(labeling[[variable]])
   if(!is.na(title[2])){
-    paste(variable, str_wrap(title[1],width = 60),title[2], sep = "\n ")
+    paste(variable, str_wrap(title[1],width = 60),title[2], sep = ": \n ")
   }else{
     paste(variable, str_wrap(title[1],width = 60), sep = "\n ")
   }
@@ -262,3 +259,7 @@ gender_color_trend = c("#796391", "#CE83A3",'#DF6E21')
 trend_colors = c("#FBA950","#5C5883","#7CBBC7","#CE83A3")
 age_colors = c("#21718A","#2096BA")
 
+
+              
+              
+              
