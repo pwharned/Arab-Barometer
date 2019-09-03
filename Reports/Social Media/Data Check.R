@@ -42,13 +42,17 @@ Age_plots = map(variable_kist, ~ plotterizer(dataframe = summaries[[1]],x=.x, fi
 Education_plots = map(variable_kist, ~ plotterizer(dataframe = summaries[[2]],x=.x, fill = "Education", pallette = "Education"))%>%
   set_names(names(abv_en[variable_kist]))####wor
 
-
 country_grouping_function=function(dataframe, varlist){
   
   dataframe%>%
     group_by(Country)%>%
     summarise_at(varlist,list(~weighted.mean(., w=wt, na.rm = TRUE)))
 }
+
+overall_summaries = country_grouping_function(test1, variable_kist)
+overall_plots = map(variable_kist, ~plotterizer(dataframe = overall_summaries, x=.x))%>%
+  set_names(names(abv_en[variable_kist]))
+
 
 test2= test1%>%
   filter(Q409%in%c(1:5))
@@ -62,13 +66,49 @@ media_usage_summaries = country_grouping_function(dataframe = test2, varlist = m
 media_usage_plots = map(media_usage_list, ~ plotterizer(dataframe = media_usage_summaries,x=.x))%>%
   set_names(nm=names(media_usage_summaries[media_usage_list]))####wor
 
-
 trend_graphs = trend_data%>%
+  mutate(wave_Na=ifelse(wave%in%c(4:5)&is.na(wt)==TRUE,TRUE,FALSE))%>%
+  filter(wave_Na==FALSE)%>%
   mutate_at(c("q2185", "q404"),recoder,c(1,2))%>%
-  mutate(q409=recoder(q409,c(1:3)))%>%
-  mutate_at(c("q2185", "q404","q409"),function(x){x*trend_data$wt})%>%
+  mutate(q409=ifelse(q409%in%c(1:3)&wave%in%c(1:3),1,ifelse(q409%in%c(1:4)&wave%in%c(4),1,ifelse(q409%in%c(1:5)&wave%in%c(5),1,0))))%>%
   group_by(wave)%>%
-  summarise_at(c("q2185", "q404","q409"), list(~mean(., na.rm=TRUE)))
+  rename_at(c("q2185", "q404","q409"), toupper)%>%
+  rename(Q218_5 = Q2185)%>%
+  summarise_at(c("Q218_5", "Q404","Q409"),list(~weighted.mean(., w=wt, na.rm = TRUE)))
+  
+trend_plots = map(c("Q218_5", "Q404","Q409"), ~trend_graph_function(dataframe =trend_graphs, x="wave", y=.x, pallette="light blue 4"))%>%
+  set_names(c("Q218_5", "Q404","Q409"))
+
+for( i in seq_along(trend_plots)){
+  plot=trend_plots[[i]]
+  
+  ggsave(filename = paste(names(trend_plots)[[i]], "trend.png",sep = "_"), plot = plot, device = "png",path = paste(getwd()))
+}
+
+for( i in seq_along(Education_plots)){
+  plot=Education_plots[[i]]
+  
+  ggsave(filename = paste(names(Education_plots)[[i]], "education.png",sep = "_"), plot = plot, device = "png",path = paste(getwd()))
+}
 
 
+for( i in seq_along(Age_plots)){
+  plot=Age_plots[[i]]
+  
+  ggsave(filename = paste(names(Age_plots)[[i]], "age.png",sep = "_"), plot = plot, device = "png",path = paste(getwd()))
+}
 
+
+for( i in seq_along(media_usage_plots)){
+  plot=media_usage_plots[[i]]
+  
+  ggsave(filename = paste(names(media_usage_plots)[[i]], "overall.png",sep = "_"), plot = plot, device = "png",path = paste(getwd()))
+}
+
+for( i in seq_along(overll_plots)){
+  plot=overll_plots[[i]]
+  
+  ggsave(filename = paste(names(overall_plots)[[i]], "overall.png",sep = "_"), plot = plot, device = "png",path = paste(getwd()))
+}
+
+    
