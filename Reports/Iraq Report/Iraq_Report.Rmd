@@ -18,7 +18,7 @@ source("/Users/pharned/Google Drive/Coding/R Projects/Arab-Barometer-Wraps/Funct
 abv=abv_en
 democracy_list=find_variable("democracy", abv)
 abv=recode_country(abv)%>%
-  mutate(Age= ifelse(Q1001%in%c(18:29),"18-29s"))
+  mutate(Age= ifelse(Q1001%in%c(18:29),"18-29"))
 
 labs_to_recode = c("strongly", "statement", "suitable", "dictatorship")
 recode_values = list(c(1,2), c(4), c(6:10), c(6:10))
