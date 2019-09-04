@@ -1,5 +1,6 @@
 
-
+source("/Users/pharned/Google Drive/Coding/R Projects/Arab-Barometer-Wraps/Functions.R")
+setwd("/Users/pharned/Documents/Arab-Barometer/Reports/Social Media")
 abv_en1=recode_country(abv_en)
 
 recoder = function(x, list){   ###create a function we use to recod variables to get the mean
@@ -33,14 +34,14 @@ summaries = map(by_variables, ~grouping_function(dataframe = test1, x=.x, varlis
  
 ##lets figure out later how to add names to the elements of the list
 
-map(summaries,~ map(variable_kist, ~ plotterizer(dataframe = .y,x=.x, fill = "Age", pallette = "Age"),.y=.x))####wor
+###map(summaries,~ map(variable_kist, ~ plotterizer(dataframe = .y,x=.x, fill = "Age", pallette = "Age"),.y=.x))####wor
 
 
 Age_plots = map(variable_kist, ~ plotterizer(dataframe = summaries[[1]],x=.x, fill = "Age", pallette = "Age"))%>%
-  set_names(names(abv_en[variable_kist]))####wor
+  set_names(paste(names(abv_en[variable_kist]),"age",sep = "_"))####wor
 
 Education_plots = map(variable_kist, ~ plotterizer(dataframe = summaries[[2]],x=.x, fill = "Education", pallette = "Education"))%>%
-  set_names(names(abv_en[variable_kist]))####wor
+  set_names(paste(names(abv_en[variable_kist]), "education",sep = "_"))####wor
 
 country_grouping_function=function(dataframe, varlist){
   
@@ -51,7 +52,7 @@ country_grouping_function=function(dataframe, varlist){
 
 overall_summaries = country_grouping_function(test1, variable_kist)
 overall_plots = map(variable_kist, ~plotterizer(dataframe = overall_summaries, x=.x))%>%
-  set_names(names(abv_en[variable_kist]))
+  set_names(paste(names(abv_en[variable_kist]), "overall",sep = "_"))
 
 
 test2= test1%>%
@@ -64,7 +65,7 @@ media_usage_list = map_chr(media_usage_list, paste)%>%
 media_usage_summaries = country_grouping_function(dataframe = test2, varlist = media_usage_list)
 
 media_usage_plots = map(media_usage_list, ~ plotterizer(dataframe = media_usage_summaries,x=.x))%>%
-  set_names(nm=names(media_usage_summaries[media_usage_list]))####wor
+  set_names(nm=paste(names(media_usage_summaries[media_usage_list]), "overall",sep = "_"))####wor
 
 trend_graphs = trend_data%>%
   mutate(wave_Na=ifelse(wave%in%c(4:5)&is.na(wt)==TRUE,TRUE,FALSE))%>%
@@ -74,41 +75,24 @@ trend_graphs = trend_data%>%
   group_by(wave)%>%
   rename_at(c("q2185", "q404","q409"), toupper)%>%
   rename(Q218_5 = Q2185)%>%
-  summarise_at(c("Q218_5", "Q404","Q409"),list(~weighted.mean(., w=wt, na.rm = TRUE)))
+  summarise_at(c("Q218_5", "Q404","Q409"),list(~weighted.mean(., w=wt, na.rm = TRUE)))%>%
+  mutate(Year = as.factor(c("2006", "2010-11","2012-14", "2016-17","2018-19")))
   
 trend_plots = map(c("Q218_5", "Q404","Q409"), ~trend_graph_function(dataframe =trend_graphs, x="wave", y=.x, pallette="light blue 4"))%>%
-  set_names(c("Q218_5", "Q404","Q409"))
+  set_names(paste(c("Q218_5", "Q404","Q409"),"trend", sep = "_"))
 
-for( i in seq_along(trend_plots)){
-  plot=trend_plots[[i]]
+plot.bind = list(trend_plots, Education_plots, Age_plots, media_usage_plots, overall_plots)%>%
+  flatten()
+
+
+setwd("/Users/pharned/Documents/Arab-Barometer/Reports/Social Media/Plots")
+
+for (i in seq_along(plot.bind)) {
+  plot = plot.bind[[i]]
+  ggsave(filename = paste(names(plot.bind)[[i]], ".png",sep = "_"), plot = plot, width =7, height = 7, device = "png",path = paste(getwd()))
   
-  ggsave(filename = paste(names(trend_plots)[[i]], "trend.png",sep = "_"), plot = plot, device = "png",path = paste(getwd()))
+
 }
 
-for( i in seq_along(Education_plots)){
-  plot=Education_plots[[i]]
-  
-  ggsave(filename = paste(names(Education_plots)[[i]], "education.png",sep = "_"), plot = plot, device = "png",path = paste(getwd()))
-}
-
-
-for( i in seq_along(Age_plots)){
-  plot=Age_plots[[i]]
-  
-  ggsave(filename = paste(names(Age_plots)[[i]], "age.png",sep = "_"), plot = plot, device = "png",path = paste(getwd()))
-}
-
-
-for( i in seq_along(media_usage_plots)){
-  plot=media_usage_plots[[i]]
-  
-  ggsave(filename = paste(names(media_usage_plots)[[i]], "overall.png",sep = "_"), plot = plot, device = "png",path = paste(getwd()))
-}
-
-for( i in seq_along(overll_plots)){
-  plot=overll_plots[[i]]
-  
-  ggsave(filename = paste(names(overall_plots)[[i]], "overall.png",sep = "_"), plot = plot, device = "png",path = paste(getwd()))
-}
 
     
