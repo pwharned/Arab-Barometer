@@ -154,9 +154,9 @@ check_splitsB= function(data, split, variable){
 }
 
 
-splitsAis1_NAS = map(unlist(splitsa_1$without_unederscore), ~check_splitsA(data = abv, split = 1, variable = .x))%>%
+splitsAis1_NAS = map(unlist(splitsa_1$without_unederscore), ~check_splitsA(data = abv_en, split = 1, variable = .x))%>%
   set_names(unlist(splitsa_1$without_unederscore))
-splitssAis2_NAS = map(unlist(splitsa_2$without_unederscore), ~check_splitsA(data = abv, split = 2, variable = .x))%>%
+splitssAis2_NAS = map(unlist(splitsa_2$without_unederscore), ~check_splitsA(data = abv_en, split = 2, variable = .x))%>%
   set_names(unlist(splitsa_2$without_unederscore))
 
 splits_names = list(splitsa_1$without_unederscore,splitsa_2$without_unederscore)%>%

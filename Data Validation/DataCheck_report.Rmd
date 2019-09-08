@@ -1,0 +1,196 @@
+---
+title: "Data Check"
+author: "Patrick Harned"
+date: "9/3/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+source("/Users/pharned/Google Drive/Coding/R Projects/Arab-Barometer-Wraps/Functions.R")
+abv=abv_en
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+
+
+
+
+
+
+Q211 Lebanon,Palestine if Q211=SYSMIS and Q210 in (1,2,3) -> 99. Libya dirty code 0->sysmis (filter). 
+
+```{r}
+variables = c("Q211", "Q210")
+Q211 = abv%>%
+  filter(Q210 %in% c(1:3)&Q211%in%c(NA))%>%
+  select(Q210, Q211, id, country)
+```
+Palestine,Yemen: incorrect filter, some answers for q210=not at all, dk,refused
+This means there are observations im Q210 (to what extent do you t hink that corruption is present) saying (dont know, no extent, or refused), but we see the same observations reporting that they belive the government is tackling corruption to a certain extent for Q211 (1/3)
+
+```{r}
+abv%>%
+  filter(country %in%c(15,22))%>%
+  filter(Q210%in%c(98,99, NA, 4), Q211%in%c(1:3))%>%
+  select(country, id, Q211, Q210)%>%
+  print(n=100)
+```
+
+Q211A Lebanon, Palestine if Q211A=sysmis and Q210 in (1,2,3) -> 99 Kuwait,Yemen no filtering. Palestine incorrect filter, some answers for q210=not at all, dk, refused
+
+Q211A is extent of corruption at the local level. Interviewers were not supposed to ask this question ( but i think its kind of silly because its possibole that people think that the national government isnt corrupt but the local government is.)
+
+
+
+```{r}
+Q210_1 = abv%>%
+  filter(Q210%in%c(1:3)&Q211A%in%c(NA))%>%
+  select(country,splita, id, Q211A, Q210)%>%
+  print(n=100)
+
+Q210_2 = abv%>%
+  filter(Q210%in%c(4,98,99,NA), Q211A%in%c(1:3))%>%
+    select(Q211A, Q210, splita, id)%>%
+  print(n=100)
+
+```
+
+
+
+Only Muslims were supposed to be asked q602_4a, bu there are about 80 observations from Lebanon where a non muslim was asked. All of those are Druze, and one Catholic.
+```{r}
+abv%>%
+  filter_at(c("Q602_4A"), any_vars(.%nin%c(NA)))%>%
+  filter(country%nin%c(9)&Q1012!=1)%>%
+  select(id, Q602_4A, country, splita, Q1012, Q1012A)
+```
+
+
+
+
+Yemen incorrect filter. some answers for splita=1
+```{r}
+
+abv%>%
+  filter_at(c("Q604B_1", "Q604B_3"), any_vars(.%nin%c(NA)))%>%
+  filter(country!=9&splita==1)%>%
+  select(id, Q604B_1,Q604B_3, country, splita)
+```
+
+
+Q605 Lebanon, Asked only to Muslim
+
+Q605A_xxx,Q605B All countries, if Q605A_xxx=sysmis and splita=2-> 99 refused.
+
+Actually only  relevant for Lebanon, Iraq and Libya
+
+
+```{r}
+
+abv %>% 
+    filter_at(dplyr::vars(starts_with("Q605")), any_vars(. %in%c(NA)))%>%
+  filter(country!=9&splita==2&Q1012==1)%>%
+  select(starts_with("Q605A"), id, country)
+  
+
+
+```
+Yemen incorrect filter. some answers for splita=2
+```{r}
+abv %>% 
+    filter_at(dplyr::vars(starts_with("Q605A")), any_vars(. %nin%c(NA)))%>%
+  filter(country==22&splita==1&Q1012==1)%>%
+  select(starts_with("Q605A"), id, country, splita)
+```
+
+
+
+Q607_7 Lebanon, Asked only to Muslims - Question was also asked to Druze in Lebanon 
+
+
+```{r}
+abv%>%
+  filter_at(dplyr::vars(starts_with("Q607")), any_vars(.%nin%c(NA)))%>%
+  filter(Q1012!=1)%>%
+  select(starts_with("Q607"),id, country, Q1012, Q1012A) 
+```
+
+Yemen incorrect filter, some answers for splita=1 ( again i think he means 2 here)
+
+```{r}
+abv%>%
+  filter_at(c("Q703"), any_vars(.%nin%c(NA)))%>%
+  filter(splita==2&country!=9)%>%
+  select(Q703, id, country)
+```
+ Yemen incorrect filter. some answers for Q851B=refused, dk or no or INAP ( not sure what this means)
+```{r}
+
+abv%>%
+  filter(Q851B%nin%c(NA)&Q851A%in%c(2,98,99))%>%
+  select(id, country, Q851B, Q851A)
+
+```
+Q855A  Yemen, few incorrect answers for splita=1
+Q855B Yemen, few incorrect answers for splita=1
+Yemen incorrect filter, some answers for splita=1
+```{r}
+abv_en%>%
+  filter_at(c("Q852","Q853A", "Q854", "Q855A", "Q855B"), any_vars(.%nin%c(NA)))%>%
+              filter(splita==1&country!=9)%>%
+  select(id, country, splita)
+```
+
+
+ Q853A Iraq, Filter, some female have answered. 
+```{r}
+
+```
+
+
+```{r}
+
+```
+Q853B Morocco if splita=2 and Q1002=1 and q853B=sysmis ->99 Refused.  Palestine: Filter only by splita=2. Yemen, only filter by split A=2 with few incorrect answers for splita=1
+
+A1 Region not labelled for Kuwait and not available for Lebanon
+
+A1 does not exist for Lebanon as we stratified by sect. We have no clear list for Kuwait, it might be worth setting it to . for Kuwait too. 
+
+
+Q1001A Unlabelled governorate Sudan 190011 Set to "White Nile"
+
+Already corrected. 
+
+
+Q1001B: Iraq,Libya, Morocco, Palestine, Tunisia Revise codes 98,99... are they 998,999?
+
+Could be valid code, the DK and REF codes are 998 and 999. This is about years living in the neighborhood. We have some old ages, so I would not drop 99 and 98. 
+
+Iraq: code 100 recoded to 0
+Sudan code 243 set to 0
+Tunisia code 138 recoded to 0
+
+I am not sure this is ok. Would recommend coding as .
+
+Q1014A Algeria: Value 47 strange. Yemen: value 26 strange
+
+Corrected in our latest file as 9 or more. 
+
+Q1018: Lebanon: Sysmis assumed 0?
+
+Yes, we only have 50 cases with member of HH with a disability, should be recoded
+
+Q1015A_YEM Yemen has only values 0 or 1, unlabelled.
+
+Already corrected. 
+
+WT:
+Libya Equilibrate =WT*0.9829659318637163, also there are 17 cases with very high weight
+Palestine: Equilibrate: =WT*1.0071525732501436
+
+Palestine cannot be changes as Walid weighted and we do not know how. Libya truncate, but mind you we will change the data book. 
+
+
+
