@@ -1,0 +1,530 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={Data Check},
+            pdfauthor={Patrick Harned},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\providecommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{Data Check}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{Patrick Harned}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+      \predate{\centering\large\emph}
+  \postdate{\par}
+    \date{9/3/2019}
+
+
+\begin{document}
+\maketitle
+
+Q211 Lebanon,Palestine if Q211=SYSMIS and Q210 in (1,2,3)
+-\textgreater{} 99. Libya dirty code 0-\textgreater{}sysmis (filter).
+
+\begin{verbatim}
+## # A tibble: 12 x 4
+##                 Q210      Q211    id        country
+##            <dbl+lbl> <dbl+lbl> <dbl>      <dbl+lbl>
+##  1 1 [large extent]         NA  1521 10 [Lebanon]  
+##  2 1 [large extent]         NA   619 10 [Lebanon]  
+##  3 1 [large extent]         NA  2142 10 [Lebanon]  
+##  4 1 [large extent]         NA   730 10 [Lebanon]  
+##  5 1 [large extent]         NA  2222 10 [Lebanon]  
+##  6 1 [large extent]         NA   729 10 [Lebanon]  
+##  7 1 [large extent]         NA  2098 10 [Lebanon]  
+##  8 1 [large extent]         NA  1330 10 [Lebanon]  
+##  9 1 [large extent]         NA   728 10 [Lebanon]  
+## 10 1 [large extent]         NA  1719 10 [Lebanon]  
+## 11 1 [large extent]         NA  1744 10 [Lebanon]  
+## 12 2 [medium extent]        NA 15488 15 [Palestine]
+\end{verbatim}
+
+Palestine,Yemen: incorrect filter, some answers for q210=not at all,
+dk,refused This means there are observations im Q210 (to what extent do
+you t hink that corruption is present) saying (dont know, no extent, or
+refused), but we see the same observations reporting that they belive
+the government is tackling corruption to a certain extent for Q211 (1/3)
+
+\begin{verbatim}
+## # A tibble: 88 x 4
+##           country     id              Q211            Q210
+##         <dbl+lbl>  <dbl>         <dbl+lbl>       <dbl+lbl>
+##  1 15 [Palestine]  15017 2 [medium extent] 98 [don't know]
+##  2 15 [Palestine]  15225 2 [medium extent]  4 [no extent] 
+##  3 15 [Palestine]  15332 1 [large extent]   4 [no extent] 
+##  4 15 [Palestine]  15431 2 [medium extent] 99 [refused]   
+##  5 15 [Palestine]  15465 2 [medium extent]  4 [no extent] 
+##  6 15 [Palestine]  15474 2 [medium extent] 98 [don't know]
+##  7 15 [Palestine]  15487 1 [large extent]   4 [no extent] 
+##  8 15 [Palestine]  15681 1 [large extent]   4 [no extent] 
+##  9 15 [Palestine]  15781 1 [large extent]   4 [no extent] 
+## 10 15 [Palestine]  15905 1 [large extent]   4 [no extent] 
+## 11 15 [Palestine]  15971 1 [large extent]   4 [no extent] 
+## 12 15 [Palestine]  16053 1 [large extent]  98 [don't know]
+## 13 15 [Palestine]  16054 3 [small extent]  98 [don't know]
+## 14 15 [Palestine]  16068 2 [medium extent]  4 [no extent] 
+## 15 15 [Palestine]  16085 3 [small extent]  98 [don't know]
+## 16 15 [Palestine]  16141 2 [medium extent] 98 [don't know]
+## 17 15 [Palestine]  16145 3 [small extent]  99 [refused]   
+## 18 22 [Yemen]     221737 1 [large extent]   4 [no extent] 
+## 19 22 [Yemen]     222361 1 [large extent]   4 [no extent] 
+## 20 22 [Yemen]     220797 1 [large extent]   4 [no extent] 
+## 21 22 [Yemen]     222699 1 [large extent]   4 [no extent] 
+## 22 22 [Yemen]     222695 1 [large extent]   4 [no extent] 
+## 23 22 [Yemen]     222380 1 [large extent]   4 [no extent] 
+## 24 22 [Yemen]     220926 2 [medium extent]  4 [no extent] 
+## 25 22 [Yemen]     222398 3 [small extent]   4 [no extent] 
+## 26 22 [Yemen]     220915 3 [small extent]   4 [no extent] 
+## 27 22 [Yemen]     220812 1 [large extent]   4 [no extent] 
+## 28 22 [Yemen]     221753 1 [large extent]   4 [no extent] 
+## 29 22 [Yemen]     220789 1 [large extent]   4 [no extent] 
+## 30 22 [Yemen]     222016 1 [large extent]   4 [no extent] 
+## 31 22 [Yemen]     220919 1 [large extent]   4 [no extent] 
+## 32 22 [Yemen]     222402 1 [large extent]   4 [no extent] 
+## 33 22 [Yemen]     222283 1 [large extent]   4 [no extent] 
+## 34 22 [Yemen]     220910 1 [large extent]   4 [no extent] 
+## 35 22 [Yemen]     222147 1 [large extent]   4 [no extent] 
+## 36 22 [Yemen]     222038 3 [small extent]  98 [don't know]
+## 37 22 [Yemen]     221207 3 [small extent]  98 [don't know]
+## 38 22 [Yemen]     221197 1 [large extent]   4 [no extent] 
+## 39 22 [Yemen]     220514 3 [small extent]   4 [no extent] 
+## 40 22 [Yemen]     220518 1 [large extent]   4 [no extent] 
+## 41 22 [Yemen]     222391 1 [large extent]   4 [no extent] 
+## 42 22 [Yemen]     221185 2 [medium extent]  4 [no extent] 
+## 43 22 [Yemen]     222034 1 [large extent]   4 [no extent] 
+## 44 22 [Yemen]     221211 1 [large extent]   4 [no extent] 
+## 45 22 [Yemen]     221761 1 [large extent]   4 [no extent] 
+## 46 22 [Yemen]     220245 1 [large extent]   4 [no extent] 
+## 47 22 [Yemen]     220699 3 [small extent]   4 [no extent] 
+## 48 22 [Yemen]     220521 1 [large extent]   4 [no extent] 
+## 49 22 [Yemen]     220979 1 [large extent]   4 [no extent] 
+## 50 22 [Yemen]     222628 1 [large extent]  99 [refused]   
+## 51 22 [Yemen]     222385 1 [large extent]   4 [no extent] 
+## 52 22 [Yemen]     221196 1 [large extent]   4 [no extent] 
+## 53 22 [Yemen]     222390 1 [large extent]   4 [no extent] 
+## 54 22 [Yemen]     220202 3 [small extent]   4 [no extent] 
+## 55 22 [Yemen]     222032 2 [medium extent]  4 [no extent] 
+## 56 22 [Yemen]     222629 2 [medium extent]  4 [no extent] 
+## 57 22 [Yemen]     222632 3 [small extent]   4 [no extent] 
+## 58 22 [Yemen]     220581 1 [large extent]   4 [no extent] 
+## 59 22 [Yemen]     221218 1 [large extent]   4 [no extent] 
+## 60 22 [Yemen]     220553 3 [small extent]   4 [no extent] 
+## 61 22 [Yemen]     220925 1 [large extent]   4 [no extent] 
+## 62 22 [Yemen]     222045 1 [large extent]   4 [no extent] 
+## 63 22 [Yemen]     221720 1 [large extent]   4 [no extent] 
+## 64 22 [Yemen]     220912 1 [large extent]  98 [don't know]
+## 65 22 [Yemen]     222659 1 [large extent]   4 [no extent] 
+## 66 22 [Yemen]     222276 1 [large extent]   4 [no extent] 
+## 67 22 [Yemen]     220838 2 [medium extent]  4 [no extent] 
+## 68 22 [Yemen]     220890 1 [large extent]   4 [no extent] 
+## 69 22 [Yemen]     221568 1 [large extent]   4 [no extent] 
+## 70 22 [Yemen]     222407 1 [large extent]   4 [no extent] 
+## 71 22 [Yemen]     220760 1 [large extent]   4 [no extent] 
+## 72 22 [Yemen]     222698 1 [large extent]   4 [no extent] 
+## 73 22 [Yemen]     221506 1 [large extent]   4 [no extent] 
+## 74 22 [Yemen]     222304 1 [large extent]   4 [no extent] 
+## 75 22 [Yemen]     221151 3 [small extent]  98 [don't know]
+## 76 22 [Yemen]     220955 1 [large extent]   4 [no extent] 
+## 77 22 [Yemen]     222267 1 [large extent]   4 [no extent] 
+## 78 22 [Yemen]     220142 1 [large extent]   4 [no extent] 
+## 79 22 [Yemen]     220140 3 [small extent]   4 [no extent] 
+## 80 22 [Yemen]     220920 1 [large extent]   4 [no extent] 
+## 81 22 [Yemen]     222327 2 [medium extent]  4 [no extent] 
+## 82 22 [Yemen]     222696 1 [large extent]   4 [no extent] 
+## 83 22 [Yemen]     222654 2 [medium extent]  4 [no extent] 
+## 84 22 [Yemen]     220222 1 [large extent]   4 [no extent] 
+## 85 22 [Yemen]     220914 1 [large extent]   4 [no extent] 
+## 86 22 [Yemen]     222037 2 [medium extent] 98 [don't know]
+## 87 22 [Yemen]     222050 1 [large extent]   4 [no extent] 
+## 88 22 [Yemen]     222333 1 [large extent]   4 [no extent]
+\end{verbatim}
+
+Q211A Lebanon, Palestine if Q211A=sysmis and Q210 in (1,2,3)
+-\textgreater{} 99 Kuwait,Yemen no filtering. Palestine incorrect
+filter, some answers for q210=not at all, dk, refused
+
+Q211A is extent of corruption at the local level. Interviewers were not
+supposed to ask this question ( but i think its kind of silly because
+its possibole that people think that the national government isnt
+corrupt but the local government is.)
+
+\begin{verbatim}
+## # A tibble: 13 x 5
+##           country splita     id     Q211A             Q210
+##         <dbl+lbl>  <dbl>  <dbl> <dbl+lbl>        <dbl+lbl>
+##  1 10 [Lebanon]        1   1521        NA 1 [large extent]
+##  2 10 [Lebanon]        2    619        NA 1 [large extent]
+##  3 10 [Lebanon]        2   2142        NA 1 [large extent]
+##  4 10 [Lebanon]        1    730        NA 1 [large extent]
+##  5 10 [Lebanon]        1   2222        NA 1 [large extent]
+##  6 10 [Lebanon]        1    729        NA 1 [large extent]
+##  7 10 [Lebanon]        2   2098        NA 1 [large extent]
+##  8 10 [Lebanon]        2   1330        NA 1 [large extent]
+##  9 10 [Lebanon]        2    728        NA 1 [large extent]
+## 10 10 [Lebanon]        1   1719        NA 1 [large extent]
+## 11 10 [Lebanon]        1   1744        NA 1 [large extent]
+## 12 15 [Palestine]      1  15500        NA 1 [large extent]
+## 13 22 [Yemen]          2 222354        NA 3 [small extent]
+\end{verbatim}
+
+\begin{verbatim}
+## # A tibble: 129 x 4
+##          Q211A            Q210 splita          id
+##      <dbl+lbl>       <dbl+lbl>  <dbl>       <dbl>
+##   1 1 [no one] 98 [don't know]      1       15007
+##   2 2 [a few]  98 [don't know]      1       15017
+##   3 2 [a few]   4 [no extent]       1       15225
+##   4 3 [most]    4 [no extent]       1       15332
+##   5 2 [a few]   4 [no extent]       1       15446
+##   6 2 [a few]   4 [no extent]       1       15465
+##   7 1 [no one] 98 [don't know]      1       15479
+##   8 1 [no one]  4 [no extent]       2       15681
+##   9 1 [no one]  4 [no extent]       2       15781
+##  10 1 [no one]  4 [no extent]       2       15905
+##  11 2 [a few]   4 [no extent]       2       15971
+##  12 1 [no one] 98 [don't know]      2       16053
+##  13 2 [a few]  99 [refused]         2       16066
+##  14 2 [a few]   4 [no extent]       2       16068
+##  15 1 [no one] 98 [don't know]      2       16113
+##  16 3 [most]   98 [don't know]      2       16126
+##  17 1 [no one]  4 [no extent]       2      221737
+##  18 1 [no one]  4 [no extent]       2      222361
+##  19 1 [no one]  4 [no extent]       1      220797
+##  20 1 [no one]  4 [no extent]       2      222699
+##  21 1 [no one]  4 [no extent]       2      222695
+##  22 1 [no one]  4 [no extent]       2      222380
+##  23 1 [no one]  4 [no extent]       1      220926
+##  24 1 [no one]  4 [no extent]       2      222398
+##  25 1 [no one]  4 [no extent]       1      220915
+##  26 1 [no one]  4 [no extent]       1      220812
+##  27 1 [no one]  4 [no extent]       2      221753
+##  28 1 [no one]  4 [no extent]       1      220789
+##  29 1 [no one]  4 [no extent]       2      222016
+##  30 1 [no one]  4 [no extent]       1      220919
+##  31 1 [no one]  4 [no extent]       2      222402
+##  32 3 [most]   98 [don't know]      2      221719
+##  33 2 [a few]   4 [no extent]       2      222283
+##  34 1 [no one]  4 [no extent]       1      220910
+##  35 1 [no one]  4 [no extent]       2      222147
+##  36 3 [most]   98 [don't know]      1      221207
+##  37 1 [no one]  4 [no extent]       2      222252
+##  38 3 [most]    4 [no extent]       1      221197
+##  39 3 [most]    4 [no extent]       1      220514
+##  40 1 [no one]  4 [no extent]       1      220518
+##  41 1 [no one]  4 [no extent]       2      222391
+##  42 2 [a few]   4 [no extent]       2      222034
+##  43 1 [no one]  4 [no extent]       1      221211
+##  44 1 [no one]  4 [no extent]       2      221761
+##  45 1 [no one]  4 [no extent]       1      220245
+##  46 3 [most]    4 [no extent]       2      222177
+##  47 2 [a few]   4 [no extent]       1      220699
+##  48 1 [no one]  4 [no extent]       1      220521
+##  49 1 [no one]  4 [no extent]       1      220979
+##  50 1 [no one]  4 [no extent]       2      222385
+##  51 1 [no one]  4 [no extent]       1      221196
+##  52 1 [no one]  4 [no extent]       2      222390
+##  53 2 [a few]   4 [no extent]       1      220202
+##  54 3 [most]    4 [no extent]       2      222032
+##  55 3 [most]    4 [no extent]       2      222629
+##  56 2 [a few]   4 [no extent]       2      222632
+##  57 1 [no one]  4 [no extent]       1      220581
+##  58 1 [no one]  4 [no extent]       1      221218
+##  59 2 [a few]   4 [no extent]       1      220553
+##  60 1 [no one]  4 [no extent]       1      220925
+##  61 1 [no one]  4 [no extent]       2      222045
+##  62 1 [no one]  4 [no extent]       2      221720
+##  63 2 [a few]  98 [don't know]      1      220906
+##  64 2 [a few]  98 [don't know]      2      222690
+##  65 1 [no one] 98 [don't know]      1      220912
+##  66 1 [no one]  4 [no extent]       2      222659
+##  67 2 [a few]   4 [no extent]       2      222084
+##  68 1 [no one]  4 [no extent]       2      222276
+##  69 2 [a few]   4 [no extent]       1      220838
+##  70 1 [no one]  4 [no extent]       1      220890
+##  71 1 [no one]  4 [no extent]       2      221568
+##  72 1 [no one]  4 [no extent]       2      222407
+##  73 1 [no one]  4 [no extent]       1      220760
+##  74 1 [no one]  4 [no extent]       2      222698
+##  75 1 [no one]  4 [no extent]       2      221506
+##  76 1 [no one]  4 [no extent]       2      222304
+##  77 2 [a few]  98 [don't know]      1      221151
+##  78 1 [no one]  4 [no extent]       1      220955
+##  79 1 [no one]  4 [no extent]       2      222267
+##  80 1 [no one]  4 [no extent]       1      220142
+##  81 1 [no one]  4 [no extent]       1      220700
+##  82 2 [a few]   4 [no extent]       1      220140
+##  83 1 [no one]  4 [no extent]       1      220920
+##  84 1 [no one]  4 [no extent]       2      222327
+##  85 1 [no one]  4 [no extent]       2      222696
+##  86 2 [a few]   4 [no extent]       2      222654
+##  87 1 [no one]  4 [no extent]       2      222715
+##  88 1 [no one]  4 [no extent]       1      220222
+##  89 1 [no one]  4 [no extent]       1      220914
+##  90 3 [most]   98 [don't know]      2      222037
+##  91 1 [no one]  4 [no extent]       2      222050
+##  92 1 [no one]  4 [no extent]       2      222333
+##  93 1 [no one]  4 [no extent]       1  1901110082
+##  94 1 [no one]  4 [no extent]       2  1303260066
+##  95 1 [no one]  4 [no extent]       1  1203260072
+##  96 1 [no one]  4 [no extent]       2  1501260021
+##  97 2 [a few]   4 [no extent]       1 14010700104
+##  98 1 [no one]  4 [no extent]       2  1303050028
+##  99 1 [no one]  4 [no extent]       2 14041100115
+## 100 1 [no one]  4 [no extent]       1  1901110089
+## # ... with 29 more rows
+\end{verbatim}
+
+Only Muslims were supposed to be asked q602\_4a, bu there are about 80
+observations from Lebanon where a non muslim was asked. All of those are
+Druze, and one Catholic.
+
+\begin{verbatim}
+## # A tibble: 81 x 6
+##       id           Q602_4A      country splita     Q1012     Q1012A
+##    <dbl>         <dbl+lbl>    <dbl+lbl>  <dbl> <dbl+lbl>  <dbl+lbl>
+##  1  1561 4 [like]          10 [Lebanon]      1 5 [other] 10 [Druze]
+##  2  1442 4 [like]          10 [Lebanon]      1 5 [other] 10 [Druze]
+##  3  2306 4 [like]          10 [Lebanon]      2 5 [other] 10 [Druze]
+##  4  1116 4 [like]          10 [Lebanon]      1 5 [other] 10 [Druze]
+##  5  1457 4 [like]          10 [Lebanon]      2 5 [other] 10 [Druze]
+##  6  1136 4 [like]          10 [Lebanon]      1 5 [other] 10 [Druze]
+##  7  1580 4 [like]          10 [Lebanon]      2 5 [other] 10 [Druze]
+##  8  2303 5 [strongly like] 10 [Lebanon]      2 5 [other] 10 [Druze]
+##  9  1552 4 [like]          10 [Lebanon]      2 5 [other] 10 [Druze]
+## 10  1553 4 [like]          10 [Lebanon]      1 5 [other] 10 [Druze]
+## # ... with 71 more rows
+\end{verbatim}
+
+Yemen incorrect filter. some answers for splita=1
+
+\begin{verbatim}
+## # A tibble: 5 x 5
+##       id             Q604B_1             Q604B_3    country splita
+##    <dbl>           <dbl+lbl>           <dbl+lbl>  <dbl+lbl>  <dbl>
+## 1 221307 1 [large degree]    2 [moderate degree] 22 [Yemen]      1
+## 2 221918 1 [large degree]    1 [large degree]    22 [Yemen]      1
+## 3 221569 3 [small degree]    2 [moderate degree] 22 [Yemen]      1
+## 4 222674 1 [large degree]    1 [large degree]    22 [Yemen]      1
+## 5 221313 2 [moderate degree] 2 [moderate degree] 22 [Yemen]      1
+\end{verbatim}
+
+Q605 Lebanon, Asked only to Muslim
+
+Q605A\_xxx,Q605B All countries, if Q605A\_xxx=sysmis and
+splita=2-\textgreater{} 99 refused.
+
+Actually only relevant for Lebanon, Iraq and Libya
+
+\begin{verbatim}
+## # A tibble: 321 x 6
+##          Q605A_1        Q605A_2       Q605A_3       Q605A_4     id  country
+##        <dbl+lbl>      <dbl+lbl>     <dbl+lbl>     <dbl+lbl>  <dbl> <dbl+lb>
+##  1  3 [disagree]  3 [disagree]   1 [strongly~  3 [disagree] 2.22e5 22 [Yem~
+##  2  1 [strongly~  2 [agree]      2 [agree]     2 [agree]    2.22e5 22 [Yem~
+##  3 NA             4 [strongly ~  4 [strongly~  3 [disagree] 2.22e5 22 [Yem~
+##  4  1 [strongly~  1 [strongly ~  3 [disagree] NA            2.22e5 22 [Yem~
+##  5  2 [agree]     2 [agree]      3 [disagree] 98 [don't kn~ 8.36e7  7 [Ira~
+##  6  1 [strongly~  1 [strongly ~ 98 [don't kn~  3 [disagree] 8.34e7  7 [Ira~
+##  7 NA            NA             NA            NA            8.29e7  7 [Ira~
+##  8  2 [agree]    98 [don't kno~  2 [agree]     4 [strongly~ 8.36e7  7 [Ira~
+##  9  2 [agree]    98 [don't kno~ 98 [don't kn~  4 [strongly~ 8.33e7  7 [Ira~
+## 10  2 [agree]    98 [don't kno~  4 [strongly~  3 [disagree] 8.36e7  7 [Ira~
+## # ... with 311 more rows
+\end{verbatim}
+
+Yemen incorrect filter. some answers for splita=2
+
+\begin{verbatim}
+## # A tibble: 3 x 7
+##         Q605A_1       Q605A_2      Q605A_3   Q605A_4     id  country splita
+##       <dbl+lbl>     <dbl+lbl>    <dbl+lbl> <dbl+lbl>  <dbl> <dbl+lb>  <dbl>
+## 1 3 [disagree]  2 [agree]     2 [agree]    2 [agree] 221918 22 [Yem~      1
+## 2 1 [strongly ~ 1 [strongly ~ 1 [strongly~ 2 [agree] 221569 22 [Yem~      1
+## 3 1 [strongly ~ 1 [strongly ~ 2 [agree]    3 [disag~ 222674 22 [Yem~      1
+\end{verbatim}
+
+Q607\_7 Lebanon, Asked only to Muslims - Question was also asked to
+Druze in Lebanon
+
+\begin{verbatim}
+## # A tibble: 80 x 7
+##            Q607_2       Q607_6     Q607_7    id    country   Q1012   Q1012A
+##         <dbl+lbl>    <dbl+lbl>  <dbl+lbl> <dbl>  <dbl+lbl> <dbl+l> <dbl+lb>
+##  1 3 [disagree]   1 [strongly~ 2 [agree]   1561 10 [Leban~ 5 [oth~ 10 [Dru~
+##  2 3 [disagree]   2 [agree]    2 [agree]   1442 10 [Leban~ 5 [oth~ 10 [Dru~
+##  3 3 [disagree]   2 [agree]    2 [agree]   2306 10 [Leban~ 5 [oth~ 10 [Dru~
+##  4 3 [disagree]   2 [agree]    2 [agree]   1116 10 [Leban~ 5 [oth~ 10 [Dru~
+##  5 3 [disagree]   2 [agree]    2 [agree]   1457 10 [Leban~ 5 [oth~ 10 [Dru~
+##  6 3 [disagree]   2 [agree]    2 [agree]   1136 10 [Leban~ 5 [oth~ 10 [Dru~
+##  7 3 [disagree]   2 [agree]    2 [agree]   1580 10 [Leban~ 5 [oth~ 10 [Dru~
+##  8 4 [strongly d~ 1 [strongly~ 2 [agree]   2303 10 [Leban~ 5 [oth~ 10 [Dru~
+##  9 2 [agree]      2 [agree]    3 [disagr~  1552 10 [Leban~ 5 [oth~ 10 [Dru~
+## 10 3 [disagree]   2 [agree]    3 [disagr~  1553 10 [Leban~ 5 [oth~ 10 [Dru~
+## # ... with 70 more rows
+\end{verbatim}
+
+Yemen incorrect filter, some answers for splita=1 ( again i think he
+means 2 here)
+
+\begin{verbatim}
+## # A tibble: 3 x 3
+##           Q703     id    country
+##      <dbl+lbl>  <dbl>  <dbl+lbl>
+## 1 3 [limit]    222096 22 [Yemen]
+## 2 3 [limit]    222797 22 [Yemen]
+## 3 2 [the same] 222094 22 [Yemen]
+\end{verbatim}
+
+Yemen incorrect filter. some answers for Q851B=refused, dk or no or INAP
+( not sure what this means)
+
+\begin{verbatim}
+## # A tibble: 21 x 4
+##        id    country     Q851B     Q851A
+##     <dbl>  <dbl+lbl> <dbl+lbl> <dbl+lbl>
+##  1 222240 22 [Yemen]   2 [no]     2 [no]
+##  2 222513 22 [Yemen]   1 [yes]    2 [no]
+##  3 220683 22 [Yemen]   2 [no]     2 [no]
+##  4 220744 22 [Yemen]   2 [no]     2 [no]
+##  5 222073 22 [Yemen]   1 [yes]    2 [no]
+##  6 220753 22 [Yemen]   2 [no]     2 [no]
+##  7 220589 22 [Yemen]   1 [yes]    2 [no]
+##  8 222488 22 [Yemen]   2 [no]     2 [no]
+##  9 220706 22 [Yemen]   1 [yes]    2 [no]
+## 10 222193 22 [Yemen]   1 [yes]    2 [no]
+## # ... with 11 more rows
+\end{verbatim}
+
+Q855A Yemen, few incorrect answers for splita=1 Q855B Yemen, few
+incorrect answers for splita=1 Yemen incorrect filter, some answers for
+splita=1
+
+\begin{verbatim}
+## # A tibble: 4 x 3
+##       id    country splita
+##    <dbl>  <dbl+lbl>  <dbl>
+## 1 221918 22 [Yemen]      1
+## 2 220128 22 [Yemen]      1
+## 3 221569 22 [Yemen]      1
+## 4 222674 22 [Yemen]      1
+\end{verbatim}
+
+Q853A Iraq, Filter, some female have answered.
+
+Q853B Morocco if splita=2 and Q1002=1 and q853B=sysmis -\textgreater{}99
+Refused. Palestine: Filter only by splita=2. Yemen, only filter by split
+A=2 with few incorrect answers for splita=1
+
+A1 Region not labelled for Kuwait and not available for Lebanon
+
+A1 does not exist for Lebanon as we stratified by sect. We have no clear
+list for Kuwait, it might be worth setting it to . for Kuwait too.
+
+Q1001A Unlabelled governorate Sudan 190011 Set to ``White Nile''
+
+Already corrected.
+
+Q1001B: Iraq,Libya, Morocco, Palestine, Tunisia Revise codes
+98,99\ldots{} are they 998,999?
+
+Could be valid code, the DK and REF codes are 998 and 999. This is about
+years living in the neighborhood. We have some old ages, so I would not
+drop 99 and 98.
+
+Iraq: code 100 recoded to 0 Sudan code 243 set to 0 Tunisia code 138
+recoded to 0
+
+I am not sure this is ok. Would recommend coding as .
+
+Q1014A Algeria: Value 47 strange. Yemen: value 26 strange
+
+Corrected in our latest file as 9 or more.
+
+Q1018: Lebanon: Sysmis assumed 0?
+
+Yes, we only have 50 cases with member of HH with a disability, should
+be recoded
+
+Q1015A\_YEM Yemen has only values 0 or 1, unlabelled.
+
+Already corrected.
+
+WT: Libya Equilibrate =WT\emph{0.9829659318637163, also there are 17
+cases with very high weight Palestine: Equilibrate:
+=WT}1.0071525732501436
+
+Palestine cannot be changes as Walid weighted and we do not know how.
+Libya truncate, but mind you we will change the data book.
+
+
+\end{document}

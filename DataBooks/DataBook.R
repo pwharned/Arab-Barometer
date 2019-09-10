@@ -1,15 +1,38 @@
 setwd("/Users/pharned/Documents/Arab-Barometer/DataBooks")
-
+library(list)
 source("/Users/pharned/Google Drive/Coding/R Projects/Arab-Barometer-Wraps/Functions.R")
-
+abv = abv_en
 `%nin%`=negate(`%in%`)
 ###grab value labs so we know how to recode
-for (i in seq_along(names(labeling))){
-  if(names(labeling)[[i]] %nin% names(abv_en)){
-    print(i)
+
+
+##Q104B requires special coding.
+find_variable("migration: destination", abv_en)
+
+
+abv$Q104B_GCC = mutate(abv_en, ifelse(Q104B_KSA+Q104B_UAE+Q104B_QA+Q104B_BA+Q104B_KU+Q104B_OM%in%c(1:7), 1, 0))
+abv$Q104B_MENA =  mutate(abv_en, ifelse(Q104B_EG+Q104B_JO+Q104B_LEB+Q104B_MO+Q104B_AL+Q104B_TUN+Q104B_TUR%in%c(1:7), 1, 0))
+abv$Q104B_EU =  mutate(abv_en, ifelse(Q104B_EEU+Q104B_FR+Q104B_GER+Q104B_ESP+Q104B_IT+Q104B_WEUOTHER+Q104B_WEU+Q104B_UK%in%c(1:7), 1, 0))
+abv$Q104B_US =  mutate(abv_en, ifelse(Q104B_US%in%c(1:7), 1, 0))
+abv$Q104B_CAN = mutate(abv_en, ifelse(Q104B_CAN%in%c(1:7), 1, 0))
+
+  
+
+##Q301
+abv$Q301B=ifelse(abv$Q301B%in%c(4,5),1,0)
+abv$Q301A =  ifelse(abv$Q301A==1, 1, 0)
+abv$Q301 = ifelse(abv$splita==1, abv$Q301A, abv$Q301B)
+
+##Q860
+source("/Users/pharned/Documents/Arab-Barometer/DataBooks/Q860.R")
+
+exclude = unique(map(names(labeling), function(x){
+  if(x%nin%names(abv)){
+    print(x)
   }
-}
-exclude = c(13,43,44,72,79,92,102,133,134)
+}))
+
+labeling
 
 labs = map(names(abv_en[names(labeling[-exclude])]), function(x) print(val_lab(abv_en[[x]])))%>%
   unique()
