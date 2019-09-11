@@ -32,7 +32,7 @@ exclude = unique(map(names(labeling), function(x){
   }
 }))
 
-labeling
+
 
 labs = map(names(abv_en[names(labeling[-exclude])]), function(x) print(val_lab(abv_en[[x]])))%>%
   unique()
@@ -50,7 +50,7 @@ for (i in seq_along(labs)){
   }
 }
 
-labs_values = cbind(labs, values)
+labs_values = as.tibble(labs, values)
 
 recode = function(dataframe, variable){
   print(val_lab(dataframe[[variable]]))
