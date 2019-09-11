@@ -6,7 +6,8 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-source("/Users/pharned/Google Drive/Coding/R Projects/Arab-Barometer-Wraps/Functions.R")
+##source('~/Documents/Arab-Barometer/Wraps/Functions.R')
+
 source("/Users/pharned/Documents/Arab-Barometer/Data Validation/Data Check.R")
 
 abv=abv_en

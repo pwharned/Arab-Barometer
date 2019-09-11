@@ -1,4 +1,7 @@
 
+##source('~/Documents/Arab-Barometer/Wraps/Functions.R')
+
+
 for(i in c("expss", "haven","readxl","tidyverse","ggrepel")){library(i,character.only = TRUE)}
 
 
@@ -15,7 +18,7 @@ if(startsWith(getwd(),"C")==TRUE){
     abv_ara <- read_dta("/Volumes/GoogleDrive/Shared drives/Arab Barometer/AB5/Data/Release Data/ABV_Crosssectional_Data_Release_ARA.dta")
     abv_en <- read_dta("/Volumes/GoogleDrive/Shared drives/Arab Barometer/AB5/Data/Release Data/ABV_Crossectional_Data_Release_ENG.dta")
   }
-    labeling=read_xlsx("/Users/pharned/Google Drive/Coding/R Projects/Captions/Captions and Titles.xlsx", sheet = 4)
+    labeling=read_xlsx("/Users/pharned/Documents/Arab-Barometer/Wraps/Captions and Titles/Captions and Titles.xlsx", sheet = 4)
 }
 
 

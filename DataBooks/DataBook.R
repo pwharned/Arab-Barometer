@@ -1,9 +1,9 @@
 setwd("/Users/pharned/Documents/Arab-Barometer/DataBooks")
 library(list)
-source("/Users/pharned/Google Drive/Coding/R Projects/Arab-Barometer-Wraps/Functions.R")
+source('~/Documents/Arab-Barometer/Wraps/Functions.R')
 abv = abv_en
 `%nin%`=negate(`%in%`)
-###grab value labs so we know how to recode
+
 
 
 ##Q104B requires special coding.
@@ -26,15 +26,16 @@ abv$Q301 = ifelse(abv$splita==1, abv$Q301A, abv$Q301B)
 ##Q860
 source("/Users/pharned/Documents/Arab-Barometer/DataBooks/Q860.R")
 
-exclude = unique(map(names(labeling), function(x){
+exclude = unlist(unique(map(names(labeling), function(x){
   if(x%nin%names(abv)){
-    print(x)
+    return(x)
   }
-}))
+})))
+
+Subset =names(labeling)[names(labeling)%nin%exclude]
 
 
-
-labs = map(names(abv_en[names(labeling[-exclude])]), function(x) print(val_lab(abv_en[[x]])))%>%
+labs = map(names(abv[Subset]), function(x) val_lab(abv[[x]]))%>%
   unique()
 values=list()
 
@@ -50,35 +51,36 @@ for (i in seq_along(labs)){
   }
 }
 
-labs_values = as.tibble(labs, values)
 
-recode = function(dataframe, variable){
-  print(val_lab(dataframe[[variable]]))
-  for (i in seq_along(labs)) {
-    if(length(labs[[i]])!=length(val_lab(dataframe[[variable]]))){
-      next
-    }else{
-      if( sum( names(labs[[i]])==names(val_lab( dataframe[[variable]] )))==length( labs[[i]] ) ){
-        print("MATCH")
-        print(values[i])
-        variable = ifelse(dataframe[[variable]]%in%values[[i]], 1, 0)
+binarize = function(dataframe, Variables){
+  for (i in seq_along(dataframe[Variables])){
+    temp_list = list()
+    temp_list[[i]]=val_lab(dataframe[[i]])
+    temp_lab = paste(temp_list[i], collapse = "")
+    for(j in seq_along(labs)){
+      if(paste(labs[j], collapse = "")==temp_lab&is.null(values[[j]])==FALSE){
+        print("Match")
+        variable = ifelse(dataframe[[i]]%in%values[[i]], 1, 0)
         return(variable)
       }
     }
   }
 }
 
-dataframe_to_recode = abv_en%>%
+
+dataframe_to_recode = abv%>%
   filter(!is.na(wt),!is.na(id))
 
-variables_to_recode = names(labeling[-exclude])
+variables_to_recode = Subset
 
 dataframe_to_recode[variables_to_recode]
 
-variables = map(names(dataframe_to_recode[variables_to_recode]), ~recode(dataframe = dataframe_to_recode, variable = .x))%>%
-  set_names(names(dataframe_to_recode[variables_to_recode]))%>%
-  as.data.frame()%>%
-  as_tibble()%>%
+binarize(dataframe = dataframe_to_recode, Variables = Subset)
+
+variables = map(variables_to_recode, ~binarize(dataframe = dataframe_to_recode, variable = .x))
+  set_names(Subset)
+variables%>%
+  as_tibble()
   cbind(dataframe_to_recode[c("id", "country", "wt")])%>%
   select(country, id, wt, everything())%>%
   recode_country()

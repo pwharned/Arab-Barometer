@@ -1,5 +1,5 @@
 
-source("/Users/pharned/Google Drive/Coding/R Projects/Arab-Barometer-Wraps/Functions.R")
+source('~/Documents/Arab-Barometer/Wraps/Functions.R')
 setwd("/Users/pharned/Documents/Arab-Barometer/Reports/Social Media")
 abv_en1=recode_country(abv_en)
 
