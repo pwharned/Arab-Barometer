@@ -7,6 +7,8 @@ abv = abv_en
 
 
 ##Q104B requires special coding.
+find_variable("migration: destination", abv_en)
+
 
 abv$Q104B_GCC = mutate(abv_en, ifelse(Q104B_KSA+Q104B_UAE+Q104B_QA+Q104B_BA+Q104B_KU+Q104B_OM%in%c(1:7), 1, 0))
 abv$Q104B_MENA =  mutate(abv_en, ifelse(Q104B_EG+Q104B_JO+Q104B_LEB+Q104B_MO+Q104B_AL+Q104B_TUN+Q104B_TUR%in%c(1:7), 1, 0))
@@ -33,7 +35,10 @@ exclude = unlist(unique(map(names(labeling), function(x){
 Subset =names(labeling)[names(labeling)%nin%exclude]
 
 
-##remove a large element from the labs list
+labs = map(names(abv[Subset]), function(x) val_lab(abv[[x]]))%>%
+  unique()
+values=list()
+labs[[8]]=NULL ##remove a large element from the labs list
 
 for (i in seq_along(abv)) {
   print(names(abv)[[i]])
@@ -41,35 +46,64 @@ for (i in seq_along(abv)) {
   
 }
 
+for (i in seq_along(labs)){
+  print(labs[[i]])
+  value = map_int(c(1:5),function(x) (x = as.integer(readline(prompt = "Enter a list of values you want to recode for this val_lab  "))))
+  value = na.omit(value)
+  print(value)
+  if(length(value)==0){
+    values[[i]]=NULL
+  }else {
+    values[[i]]=value
+  }
+}
 
-map(c("Q101", "Q409"), ~binaraizer(.x, abv))
-
-Variables_For_Unique_Coding = c("Q2061A", "Q2061B", "Q104A", "Q841", "Q7141A", "Q7141B")
 
 
+binarize = function(dataframe, Variable){
+  variable_name = names(dataframe[Variable])
+  Variable =dataframe[[Variable]]
+  val_lab_variable = val_lab(Variable)
+    temp_lab=paste(deparse(val_lab(Variable)), collapse = "")
+    for(j in seq_along(labs)){
+      if(paste(deparse(labs[[j]]), collapse = "")==temp_lab){
+        if(is.null(values[[j]])==TRUE){
+          Variable = ifelse(Variable%in%c(95:99), 0, Variable)
+          variable_list = c()
+          for (i in val_lab_variable[val_lab_variable%nin%c(0,90:99)]){
+            Variable =ifelse(Variable%in%c(i),1,0)
+            assign(paste(variable_name, i, sep = "_"),Variable)
+          }
+          return(unique(variable_list))
+          print(variable_list)
+        }else{
+          Variable = ifelse(Variable%in%values[[j]], 1, 0)
+          names(Variable)=variable_name
+          return(Variable)
+        }
+      }else{
+        next
+      }
+    }
+  }
 
 
 
+binarize(abv, "Q7141A")
 dataframe_to_recode = abv%>%
   filter(!is.na(wt),!is.na(id))
 
 variables_to_recode = Subset
 
+dataframe_to_recode[variables_to_recode]
 
-Variables =map(Subset, ~binaraizer(dataframe = dataframe_to_recode, Variable  = .x))
-
-Variables = sapply(Subset, binaraizer, dataframe = abv, USE.NAMES = TRUE)
-  set_names()
-frame = bind_cols(Variables)%>%
-  setnames(Subset)
-
-Names = paste(names(Subset), names(frame))
-
-temp_names = str_split(names(frame), "=")
-temp_names = map(temp_names, function(x) x[2])
-  flatten()
-
-
+Variables =map(Subset, ~binarize(dataframe = dataframe_to_recode, Variable  = .x))%>%
+  set_names(Subset)
+  
+Variables%>%
+  unique()
+    
+variables%>%
   as_tibble()
   cbind(dataframe_to_recode[c("id", "country", "wt")])%>%
   select(country, id, wt, everything())%>%
