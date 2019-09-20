@@ -6,29 +6,55 @@ output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+
+
+source("/Users/pharned/Documents/Arab-Barometer/Wraps/Functions.R")
+source("/Users/pharned/Documents/Arab-Barometer/Data Validation/Data_Recode(9:19).R")
+
 library(kableExtra)
 
-map(List1, ~kable(List1$.x, caption = names(List1$.x)[1]   ))
-map(List2, ~kable(List1$.x, caption = names(List2$.x)[1]   ))
-knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```{r}
 
-```{r cars}
-summary(cars)
+
+
+kable(List2[["Q701C_5"]])
+
+kable(List2[["Q701C_6"]])
+
+
+kable(List2[["Q1017"]])
+
+kable(List2[["605B"]])
+
+kable(List2[["Q601_9A"]])
+
+
+kable(List2[["Q853B"]])
+
+kable(List2[["Q853A"]])
+
+kable(List2[["Q201C_40"]])
+
+kable(List2[["Q201C_32"]])
+
+kable(List2[["Q201C_39"]])
+
+kable(List2[["Q201C_38"]])
+
+
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+kable(List1[["Q604B_3"]])
+kable(List1[["Q204C_15"]])
+kable(List1[["Q204C_13"]])
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+

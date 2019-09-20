@@ -1,0 +1,1050 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={Checking Splits},
+            pdfauthor={Patrick Harned},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\providecommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{Checking Splits}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{Patrick Harned}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+      \predate{\centering\large\emph}
+  \postdate{\par}
+    \date{9/19/2019}
+
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+
+\begin{document}
+\maketitle
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{kable}\NormalTok{(List2[[}\StringTok{"Q701C_5"}\NormalTok{]])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{r|r|r|r}
+\hline
+Q701C\_5 & country & splita & n\\
+\hline
+1 & 15 & 1 & 271\\
+\hline
+1 & 22 & 1 & 811\\
+\hline
+2 & 15 & 1 & 111\\
+\hline
+2 & 22 & 1 & 229\\
+\hline
+3 & 15 & 1 & 88\\
+\hline
+3 & 22 & 1 & 148\\
+\hline
+98 & 15 & 1 & 16\\
+\hline
+98 & 22 & 1 & 13\\
+\hline
+99 & 22 & 1 & 2\\
+\hline
+NA & 1 & 1 & 1145\\
+\hline
+NA & 5 & 1 & 1199\\
+\hline
+NA & 7 & 1 & 1203\\
+\hline
+NA & 8 & 1 & 1186\\
+\hline
+NA & 9 & 1 & 699\\
+\hline
+NA & 10 & 1 & 1215\\
+\hline
+NA & 11 & 1 & 950\\
+\hline
+NA & 13 & 1 & 1209\\
+\hline
+NA & 15 & 1 & 795\\
+\hline
+NA & 19 & 1 & 896\\
+\hline
+NA & 21 & 1 & 1192\\
+\hline
+\end{tabular}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{kable}\NormalTok{(List2[[}\StringTok{"Q701C_6"}\NormalTok{]])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{r|r|r|r}
+\hline
+Q701C\_6 & country & splita & n\\
+\hline
+1 & 15 & 1 & 246\\
+\hline
+1 & 22 & 1 & 527\\
+\hline
+2 & 15 & 1 & 128\\
+\hline
+2 & 22 & 1 & 413\\
+\hline
+3 & 15 & 1 & 95\\
+\hline
+3 & 22 & 1 & 239\\
+\hline
+98 & 15 & 1 & 15\\
+\hline
+98 & 22 & 1 & 19\\
+\hline
+99 & 15 & 1 & 2\\
+\hline
+99 & 22 & 1 & 5\\
+\hline
+NA & 1 & 1 & 1145\\
+\hline
+NA & 5 & 1 & 1199\\
+\hline
+NA & 7 & 1 & 1203\\
+\hline
+NA & 8 & 1 & 1186\\
+\hline
+NA & 9 & 1 & 699\\
+\hline
+NA & 10 & 1 & 1215\\
+\hline
+NA & 11 & 1 & 950\\
+\hline
+NA & 13 & 1 & 1209\\
+\hline
+NA & 15 & 1 & 795\\
+\hline
+NA & 19 & 1 & 896\\
+\hline
+NA & 21 & 1 & 1192\\
+\hline
+\end{tabular}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{kable}\NormalTok{(List2[[}\StringTok{"Q1017"}\NormalTok{]])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{r|r|r|r}
+\hline
+Q1017 & country & splita & n\\
+\hline
+1 & 22 & 1 & 1\\
+\hline
+3 & 22 & 1 & 2\\
+\hline
+4 & 22 & 1 & 30\\
+\hline
+NA & 1 & 1 & 1145\\
+\hline
+NA & 5 & 1 & 1199\\
+\hline
+NA & 7 & 1 & 1203\\
+\hline
+NA & 8 & 1 & 1186\\
+\hline
+NA & 9 & 1 & 699\\
+\hline
+NA & 10 & 1 & 1215\\
+\hline
+NA & 11 & 1 & 950\\
+\hline
+NA & 13 & 1 & 1209\\
+\hline
+NA & 15 & 1 & 1281\\
+\hline
+NA & 19 & 1 & 896\\
+\hline
+NA & 21 & 1 & 1192\\
+\hline
+NA & 22 & 1 & 1170\\
+\hline
+\end{tabular}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{kable}\NormalTok{(List2[[}\StringTok{"605B"}\NormalTok{]])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{}
+\hline
+
+\hline
+\end{tabular}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{kable}\NormalTok{(List2[[}\StringTok{"Q601_9A"}\NormalTok{]])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{r|r|r|r}
+\hline
+Q601\_9A & country & splita & n\\
+\hline
+1 & 15 & 1 & 32\\
+\hline
+1 & 22 & 1 & 17\\
+\hline
+2 & 15 & 1 & 108\\
+\hline
+2 & 22 & 1 & 40\\
+\hline
+3 & 15 & 1 & 220\\
+\hline
+3 & 22 & 1 & 474\\
+\hline
+4 & 15 & 1 & 124\\
+\hline
+4 & 22 & 1 & 652\\
+\hline
+98 & 15 & 1 & 2\\
+\hline
+98 & 22 & 1 & 16\\
+\hline
+99 & 22 & 1 & 3\\
+\hline
+NA & 1 & 1 & 1145\\
+\hline
+NA & 5 & 1 & 1199\\
+\hline
+NA & 7 & 1 & 1203\\
+\hline
+NA & 8 & 1 & 1186\\
+\hline
+NA & 9 & 1 & 699\\
+\hline
+NA & 10 & 1 & 1215\\
+\hline
+NA & 11 & 1 & 950\\
+\hline
+NA & 13 & 1 & 1209\\
+\hline
+NA & 15 & 1 & 795\\
+\hline
+NA & 19 & 1 & 896\\
+\hline
+NA & 21 & 1 & 1192\\
+\hline
+NA & 22 & 1 & 1\\
+\hline
+\end{tabular}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{kable}\NormalTok{(List2[[}\StringTok{"Q853B"}\NormalTok{]])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{r|r|r|r}
+\hline
+Q853B & country & splita & n\\
+\hline
+1 & 22 & 1 & 1\\
+\hline
+2 & 22 & 1 & 1\\
+\hline
+3 & 22 & 1 & 1\\
+\hline
+NA & 1 & 1 & 1145\\
+\hline
+NA & 5 & 1 & 1199\\
+\hline
+NA & 7 & 1 & 1203\\
+\hline
+NA & 8 & 1 & 1186\\
+\hline
+NA & 9 & 1 & 699\\
+\hline
+NA & 10 & 1 & 1215\\
+\hline
+NA & 11 & 1 & 950\\
+\hline
+NA & 13 & 1 & 1209\\
+\hline
+NA & 15 & 1 & 1281\\
+\hline
+NA & 19 & 1 & 896\\
+\hline
+NA & 21 & 1 & 1192\\
+\hline
+NA & 22 & 1 & 1200\\
+\hline
+\end{tabular}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{kable}\NormalTok{(List2[[}\StringTok{"Q853A"}\NormalTok{]])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{r|r|r|r}
+\hline
+Q853A & country & splita & n\\
+\hline
+2 & 22 & 1 & 3\\
+\hline
+NA & 1 & 1 & 1145\\
+\hline
+NA & 5 & 1 & 1199\\
+\hline
+NA & 7 & 1 & 1203\\
+\hline
+NA & 8 & 1 & 1186\\
+\hline
+NA & 9 & 1 & 699\\
+\hline
+NA & 10 & 1 & 1215\\
+\hline
+NA & 11 & 1 & 950\\
+\hline
+NA & 13 & 1 & 1209\\
+\hline
+NA & 15 & 1 & 1281\\
+\hline
+NA & 19 & 1 & 896\\
+\hline
+NA & 21 & 1 & 1192\\
+\hline
+NA & 22 & 1 & 1200\\
+\hline
+\end{tabular}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{kable}\NormalTok{(List2[[}\StringTok{"Q201C_40"}\NormalTok{]])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{r|r|r|r}
+\hline
+Q201C\_40 & country & splita & n\\
+\hline
+2 & 22 & 1 & 1\\
+\hline
+3 & 22 & 1 & 2\\
+\hline
+NA & 1 & 1 & 1145\\
+\hline
+NA & 5 & 1 & 1199\\
+\hline
+NA & 7 & 1 & 1203\\
+\hline
+NA & 8 & 1 & 1186\\
+\hline
+NA & 9 & 1 & 699\\
+\hline
+NA & 10 & 1 & 1215\\
+\hline
+NA & 11 & 1 & 950\\
+\hline
+NA & 13 & 1 & 1209\\
+\hline
+NA & 15 & 1 & 1281\\
+\hline
+NA & 19 & 1 & 896\\
+\hline
+NA & 21 & 1 & 1192\\
+\hline
+NA & 22 & 1 & 1200\\
+\hline
+\end{tabular}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{kable}\NormalTok{(List2[[}\StringTok{"Q201C_32"}\NormalTok{]])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{r|r|r|r}
+\hline
+Q201C\_32 & country & splita & n\\
+\hline
+1 & 22 & 1 & 1\\
+\hline
+2 & 22 & 1 & 1\\
+\hline
+3 & 22 & 1 & 1\\
+\hline
+NA & 1 & 1 & 1145\\
+\hline
+NA & 5 & 1 & 1199\\
+\hline
+NA & 7 & 1 & 1203\\
+\hline
+NA & 8 & 1 & 1186\\
+\hline
+NA & 9 & 1 & 699\\
+\hline
+NA & 10 & 1 & 1215\\
+\hline
+NA & 11 & 1 & 950\\
+\hline
+NA & 13 & 1 & 1209\\
+\hline
+NA & 15 & 1 & 1281\\
+\hline
+NA & 19 & 1 & 896\\
+\hline
+NA & 21 & 1 & 1192\\
+\hline
+NA & 22 & 1 & 1200\\
+\hline
+\end{tabular}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{kable}\NormalTok{(List2[[}\StringTok{"Q201C_39"}\NormalTok{]])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{r|r|r|r}
+\hline
+Q201C\_39 & country & splita & n\\
+\hline
+1 & 22 & 1 & 2\\
+\hline
+3 & 22 & 1 & 1\\
+\hline
+NA & 1 & 1 & 1145\\
+\hline
+NA & 5 & 1 & 1199\\
+\hline
+NA & 7 & 1 & 1203\\
+\hline
+NA & 8 & 1 & 1186\\
+\hline
+NA & 9 & 1 & 699\\
+\hline
+NA & 10 & 1 & 1215\\
+\hline
+NA & 11 & 1 & 950\\
+\hline
+NA & 13 & 1 & 1209\\
+\hline
+NA & 15 & 1 & 1281\\
+\hline
+NA & 19 & 1 & 896\\
+\hline
+NA & 21 & 1 & 1192\\
+\hline
+NA & 22 & 1 & 1200\\
+\hline
+\end{tabular}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{kable}\NormalTok{(List2[[}\StringTok{"Q201C_38"}\NormalTok{]])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{r|r|r|r}
+\hline
+Q201C\_38 & country & splita & n\\
+\hline
+1 & 22 & 1 & 1\\
+\hline
+3 & 22 & 1 & 2\\
+\hline
+NA & 1 & 1 & 1145\\
+\hline
+NA & 5 & 1 & 1199\\
+\hline
+NA & 7 & 1 & 1203\\
+\hline
+NA & 8 & 1 & 1186\\
+\hline
+NA & 9 & 1 & 699\\
+\hline
+NA & 10 & 1 & 1215\\
+\hline
+NA & 11 & 1 & 950\\
+\hline
+NA & 13 & 1 & 1209\\
+\hline
+NA & 15 & 1 & 1281\\
+\hline
+NA & 19 & 1 & 896\\
+\hline
+NA & 21 & 1 & 1192\\
+\hline
+NA & 22 & 1 & 1200\\
+\hline
+\end{tabular}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{kable}\NormalTok{(List1[[}\StringTok{"Q604B_3"}\NormalTok{]])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{r|r|r|r}
+\hline
+Q604B\_3 & country & splita & n\\
+\hline
+1 & 1 & 2 & 73\\
+\hline
+1 & 5 & 2 & 262\\
+\hline
+1 & 7 & 2 & 221\\
+\hline
+1 & 8 & 2 & 95\\
+\hline
+1 & 10 & 2 & 57\\
+\hline
+1 & 11 & 2 & 103\\
+\hline
+1 & 13 & 2 & 161\\
+\hline
+1 & 15 & 2 & 88\\
+\hline
+1 & 19 & 2 & 85\\
+\hline
+1 & 21 & 2 & 54\\
+\hline
+1 & 22 & 2 & 456\\
+\hline
+2 & 1 & 2 & 250\\
+\hline
+2 & 5 & 2 & 362\\
+\hline
+2 & 7 & 2 & 169\\
+\hline
+2 & 8 & 2 & 186\\
+\hline
+2 & 10 & 2 & 217\\
+\hline
+2 & 11 & 2 & 129\\
+\hline
+2 & 13 & 2 & 225\\
+\hline
+2 & 15 & 2 & 204\\
+\hline
+2 & 19 & 2 & 154\\
+\hline
+2 & 21 & 2 & 117\\
+\hline
+2 & 22 & 2 & 294\\
+\hline
+3 & 1 & 2 & 321\\
+\hline
+3 & 5 & 2 & 287\\
+\hline
+3 & 7 & 2 & 117\\
+\hline
+3 & 8 & 2 & 100\\
+\hline
+3 & 10 & 2 & 255\\
+\hline
+3 & 11 & 2 & 57\\
+\hline
+3 & 13 & 2 & 270\\
+\hline
+3 & 15 & 2 & 268\\
+\hline
+3 & 19 & 2 & 154\\
+\hline
+3 & 21 & 2 & 29\\
+\hline
+3 & 22 & 2 & 226\\
+\hline
+4 & 1 & 2 & 524\\
+\hline
+4 & 5 & 2 & 272\\
+\hline
+4 & 7 & 2 & 740\\
+\hline
+4 & 8 & 2 & 827\\
+\hline
+4 & 10 & 2 & 647\\
+\hline
+4 & 11 & 2 & 700\\
+\hline
+4 & 13 & 2 & 490\\
+\hline
+4 & 15 & 2 & 649\\
+\hline
+4 & 19 & 2 & 457\\
+\hline
+4 & 21 & 2 & 982\\
+\hline
+4 & 22 & 2 & 218\\
+\hline
+98 & 1 & 2 & 16\\
+\hline
+98 & 5 & 2 & 17\\
+\hline
+98 & 7 & 2 & 6\\
+\hline
+98 & 8 & 2 & 4\\
+\hline
+98 & 10 & 2 & 9\\
+\hline
+98 & 11 & 2 & 16\\
+\hline
+98 & 13 & 2 & 44\\
+\hline
+98 & 15 & 2 & 3\\
+\hline
+98 & 19 & 2 & 7\\
+\hline
+98 & 21 & 2 & 25\\
+\hline
+98 & 22 & 2 & 3\\
+\hline
+99 & 1 & 2 & 3\\
+\hline
+99 & 5 & 2 & 1\\
+\hline
+99 & 7 & 2 & 5\\
+\hline
+99 & 8 & 2 & 2\\
+\hline
+99 & 11 & 2 & 7\\
+\hline
+99 & 13 & 2 & 1\\
+\hline
+99 & 19 & 2 & 5\\
+\hline
+99 & 21 & 2 & 1\\
+\hline
+NA & 9 & 2 & 675\\
+\hline
+\end{tabular}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{kable}\NormalTok{(List1[[}\StringTok{"Q204C_15"}\NormalTok{]])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{r|r|r|r}
+\hline
+Q204C\_15 & country & splita & n\\
+\hline
+1 & 5 & 2 & 80\\
+\hline
+1 & 7 & 2 & 27\\
+\hline
+1 & 8 & 2 & 15\\
+\hline
+1 & 10 & 2 & 3\\
+\hline
+1 & 11 & 2 & 20\\
+\hline
+1 & 13 & 2 & 46\\
+\hline
+1 & 15 & 2 & 24\\
+\hline
+1 & 19 & 2 & 14\\
+\hline
+1 & 21 & 2 & 21\\
+\hline
+1 & 22 & 2 & 69\\
+\hline
+2 & 5 & 2 & 433\\
+\hline
+2 & 7 & 2 & 261\\
+\hline
+2 & 8 & 2 & 271\\
+\hline
+2 & 10 & 2 & 76\\
+\hline
+2 & 11 & 2 & 224\\
+\hline
+2 & 13 & 2 & 250\\
+\hline
+2 & 15 & 2 & 234\\
+\hline
+2 & 19 & 2 & 195\\
+\hline
+2 & 21 & 2 & 285\\
+\hline
+2 & 22 & 2 & 229\\
+\hline
+3 & 5 & 2 & 326\\
+\hline
+3 & 7 & 2 & 444\\
+\hline
+3 & 8 & 2 & 459\\
+\hline
+3 & 10 & 2 & 489\\
+\hline
+3 & 11 & 2 & 469\\
+\hline
+3 & 13 & 2 & 367\\
+\hline
+3 & 15 & 2 & 540\\
+\hline
+3 & 19 & 2 & 429\\
+\hline
+3 & 21 & 2 & 407\\
+\hline
+3 & 22 & 2 & 427\\
+\hline
+4 & 5 & 2 & 109\\
+\hline
+4 & 7 & 2 & 428\\
+\hline
+4 & 8 & 2 & 366\\
+\hline
+4 & 10 & 2 & 603\\
+\hline
+4 & 11 & 2 & 231\\
+\hline
+4 & 13 & 2 & 300\\
+\hline
+4 & 15 & 2 & 301\\
+\hline
+4 & 19 & 2 & 166\\
+\hline
+4 & 21 & 2 & 389\\
+\hline
+4 & 22 & 2 & 337\\
+\hline
+97 & 5 & 2 & 16\\
+\hline
+97 & 7 & 2 & 10\\
+\hline
+97 & 8 & 2 & 9\\
+\hline
+97 & 10 & 2 & 9\\
+\hline
+97 & 11 & 2 & 5\\
+\hline
+97 & 13 & 2 & 44\\
+\hline
+97 & 15 & 2 & 22\\
+\hline
+97 & 19 & 2 & 8\\
+\hline
+97 & 21 & 2 & 1\\
+\hline
+97 & 22 & 2 & 29\\
+\hline
+98 & 5 & 2 & 237\\
+\hline
+98 & 7 & 2 & 85\\
+\hline
+98 & 8 & 2 & 93\\
+\hline
+98 & 10 & 2 & 5\\
+\hline
+98 & 11 & 2 & 57\\
+\hline
+98 & 13 & 2 & 182\\
+\hline
+98 & 15 & 2 & 91\\
+\hline
+98 & 19 & 2 & 45\\
+\hline
+98 & 21 & 2 & 104\\
+\hline
+98 & 22 & 2 & 102\\
+\hline
+99 & 7 & 2 & 3\\
+\hline
+99 & 8 & 2 & 1\\
+\hline
+99 & 11 & 2 & 6\\
+\hline
+99 & 13 & 2 & 2\\
+\hline
+99 & 19 & 2 & 5\\
+\hline
+99 & 21 & 2 & 1\\
+\hline
+99 & 22 & 2 & 3\\
+\hline
+NA & 1 & 2 & 1187\\
+\hline
+NA & 9 & 2 & 675\\
+\hline
+NA & 22 & 2 & 1\\
+\hline
+\end{tabular}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{kable}\NormalTok{(List1[[}\StringTok{"Q204C_13"}\NormalTok{]])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{r|r|r|r}
+\hline
+Q204C\_13 & country & splita & n\\
+\hline
+1 & 5 & 2 & 181\\
+\hline
+1 & 7 & 2 & 42\\
+\hline
+1 & 8 & 2 & 67\\
+\hline
+1 & 10 & 2 & 2\\
+\hline
+1 & 11 & 2 & 20\\
+\hline
+1 & 13 & 2 & 115\\
+\hline
+1 & 15 & 2 & 34\\
+\hline
+1 & 19 & 2 & 46\\
+\hline
+1 & 21 & 2 & 35\\
+\hline
+1 & 22 & 2 & 79\\
+\hline
+2 & 5 & 2 & 476\\
+\hline
+2 & 7 & 2 & 294\\
+\hline
+2 & 8 & 2 & 359\\
+\hline
+2 & 10 & 2 & 108\\
+\hline
+2 & 11 & 2 & 146\\
+\hline
+2 & 13 & 2 & 320\\
+\hline
+2 & 15 & 2 & 298\\
+\hline
+2 & 19 & 2 & 274\\
+\hline
+2 & 21 & 2 & 363\\
+\hline
+2 & 22 & 2 & 234\\
+\hline
+3 & 5 & 2 & 245\\
+\hline
+3 & 7 & 2 & 425\\
+\hline
+3 & 8 & 2 & 334\\
+\hline
+3 & 10 & 2 & 511\\
+\hline
+3 & 11 & 2 & 512\\
+\hline
+3 & 13 & 2 & 224\\
+\hline
+3 & 15 & 2 & 512\\
+\hline
+3 & 19 & 2 & 362\\
+\hline
+3 & 21 & 2 & 390\\
+\hline
+3 & 22 & 2 & 449\\
+\hline
+4 & 5 & 2 & 78\\
+\hline
+4 & 7 & 2 & 422\\
+\hline
+4 & 8 & 2 & 374\\
+\hline
+4 & 10 & 2 & 549\\
+\hline
+4 & 11 & 2 & 270\\
+\hline
+4 & 13 & 2 & 177\\
+\hline
+4 & 15 & 2 & 266\\
+\hline
+4 & 19 & 2 & 138\\
+\hline
+4 & 21 & 2 & 296\\
+\hline
+4 & 22 & 2 & 307\\
+\hline
+97 & 5 & 2 & 10\\
+\hline
+97 & 7 & 2 & 7\\
+\hline
+97 & 8 & 2 & 4\\
+\hline
+97 & 10 & 2 & 7\\
+\hline
+97 & 11 & 2 & 4\\
+\hline
+97 & 13 & 2 & 41\\
+\hline
+97 & 15 & 2 & 10\\
+\hline
+97 & 19 & 2 & 2\\
+\hline
+97 & 21 & 2 & 1\\
+\hline
+97 & 22 & 2 & 36\\
+\hline
+98 & 5 & 2 & 211\\
+\hline
+98 & 7 & 2 & 63\\
+\hline
+98 & 8 & 2 & 74\\
+\hline
+98 & 10 & 2 & 7\\
+\hline
+98 & 11 & 2 & 55\\
+\hline
+98 & 13 & 2 & 310\\
+\hline
+98 & 15 & 2 & 92\\
+\hline
+98 & 19 & 2 & 40\\
+\hline
+98 & 21 & 2 & 122\\
+\hline
+98 & 22 & 2 & 89\\
+\hline
+99 & 7 & 2 & 5\\
+\hline
+99 & 8 & 2 & 2\\
+\hline
+99 & 10 & 2 & 1\\
+\hline
+99 & 11 & 2 & 5\\
+\hline
+99 & 13 & 2 & 4\\
+\hline
+99 & 21 & 2 & 1\\
+\hline
+99 & 22 & 2 & 2\\
+\hline
+NA & 1 & 2 & 1187\\
+\hline
+NA & 9 & 2 & 675\\
+\hline
+NA & 22 & 2 & 1\\
+\hline
+\end{tabular}
+
+
+\end{document}
