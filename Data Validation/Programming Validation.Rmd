@@ -1,0 +1,123 @@
+---
+title: "Programming_Validation"
+author: "Patrick Harned"
+date: "9/19/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+source("/Users/pharned/Documents/Arab-Barometer/Wraps/Functions.R")
+source("/Users/pharned/Documents/Arab-Barometer/Data Validation/Data_Recode(9:19).R")
+
+library(kableExtra)
+```
+
+The following tables for questions that should only have been asked for Splita==2. 
+I have filtered out all observations for Splita==1, which means that any remaining observations should only be NA.
+
+## Q701C_5 and 6. 
+
+If spita==2 - We have observations from Palestine and Yemen here. As you can see, there are a lot, probably PAPI, I dont think we can recode these. 
+" Do you want foreign aid from
+[COUNTRY] to increase, decrease, or remain the same in the future? "
+
+```{r, Q701C_5}
+kable(List2[["Q701C_5"]])
+
+kable(List2[["Q701C_6"]])
+```
+
+## Q1017 if splita ==2. 
+
+We have observations  from splita ==1 here in Yemen
+
+Does your family receive
+remittances from someone living abroad? 
+
+```{r, Q1017}
+kable(List2[["Q1017"]])
+```
+
+## Q605b. 
+[PROGRAMMER: IF COUNTRY != 9 AND SPLITA == 2 & Q1012 == 1] Which of
+these four aspects do you think the most essential aspect of shari’a government? 
+```{r, Q605B}
+kable(List2[["Q605B"]])
+```
+
+## Q601_9A: 
+
+[PROGRAMMER: IF COUNTRY != 9 & SPLITA == 2]
+Women’s inheritance should be equal to that of men.
+
+```{r, Q601_9A}
+
+kable(List2[["Q601_9A"]])
+```
+## Q853b. 
+
+[PROGRAMMER: IF COUNTRY != 9 AND SPLIT A == 2 & Q1002 == 2] How
+important do you think it is for a man to live up to an ideal of the female body as presented by the
+media? 
+
+```{r, Q853B}
+kable(List2[["Q853B"]])
+```
+ 
+## Q853a.
+
+[PROGRAMMER: IF COUNTRY != 9 AND SPLIT A == 2 & Q1002 == 1] How
+important do you think it is for a man to live up to an ideal of the male body as presented by the
+media?
+```{r, Q853A}
+kable(List2[["Q853A"]])
+```
+
+## Q201C
+
+[PROGRAMMER: SEE SPECIFIC ITEMS] And how much trust do you have in… 
+
+[PROGRAMMER: IF SPLIT A == 2;
+ID COUNTRY != 9; ALL]
+
+```{r, Q201C_40}
+kable(List2[["Q201C_40"]])
+
+kable(List2[["Q201C_32"]])
+
+kable(List2[["Q201C_39"]])
+
+kable(List2[["Q201C_38"]])
+```
+
+## Q604b_3. 
+
+[PROGRAMMER: SEE SPECIFIC ITEMS] To what degree would each of the
+following factors be an obstacle to accepting the marriage of a close male relative?
+
+[PROGRAMMER: IF COUNTRY != 9 &
+SPLITA == 1]
+One who comes from a family with a lower
+social status
+
+```{r, Q604B_3}
+kable(List1[["Q604B_3"]])
+```
+
+## Q204c. 
+
+[PROGRAMMER: SEE SPECIFIC ITEMS] And how would you evaluate the current
+government’s performance on [INSERT ITEM]? 
+[PROGRAMMER: IF SPLITA==1 &
+COUNTRY != 1 OR 9]
+
+```{r, Q204C_15}
+kable(List1[["Q204C_15"]])
+kable(List1[["Q204C_13"]])
+```
+
+
+

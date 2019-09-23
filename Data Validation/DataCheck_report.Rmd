@@ -34,11 +34,10 @@ Palestine,Yemen: incorrect filter, some answers for q210=not at all, dk,refused
 This means there are observations im Q210 (to what extent do you t hink that corruption is present) saying (dont know, no extent, or refused), but we see the same observations reporting that they belive the government is tackling corruption to a certain extent for Q211 (1/3)
 
 ```{r}
-abv%>%
-  filter(country %in%c(15,22))%>%
-  filter(Q210%in%c(98,99, NA, 4), Q211%in%c(1:3))%>%
+abv_en%>%
+  filter(Q210%in%c(98,99, NA, 4), Q211%nin%c(NA))%>%
   select(country, id, Q211, Q210)%>%
-  print(n=100)
+  print(n=200)
 ```
 
 Q211A Lebanon, Palestine if Q211A=sysmis and Q210 in (1,2,3) -> 99 Kuwait,Yemen no filtering. Palestine incorrect filter, some answers for q210=not at all, dk, refused
@@ -157,6 +156,13 @@ abv_en%>%
  Q853A Iraq, Filter, some female have answered. 
 ```{r}
 
+```
+
+```{r}
+abv%>%
+  filter(splita==1&country!=9)%>%
+  filter_at(c("Q108_1", "Q108_2","Q108_3","Q108_4"), any_vars(.%in%c(NA)))%>%
+  select(country, id, splita, Q108_1,Q108_2,Q108_3, Q108_4, Q301A)
 ```
 
 These are all incorrect observations for splita=1/2

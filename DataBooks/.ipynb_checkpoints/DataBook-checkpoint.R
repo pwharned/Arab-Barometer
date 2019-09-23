@@ -111,7 +111,7 @@ Unique_Variables_Frame= Unique_Variables%>%
   set_names(paste(Unique_Names))%>%
   bind_cols()
 Unique_Variables_Frame= cbind(Unique_Variables_Frame, select(abv, wt, country, id, splita))%>%
-  recode_country()
+  recode_country()%>%
   country_grouping_function(Unique_Names)
 Unique_Variables_Plots = map(Unique_Names, ~plotterizer(dataframe =Unique_Variables_Frame, x=.x, y="Country" ))
   names(Unique_Variables_Plots)=Unique_Names

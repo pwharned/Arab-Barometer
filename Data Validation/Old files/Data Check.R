@@ -193,12 +193,20 @@ fix_splits[["Q701C_2"]]=fix_splits[["Q701C_2"]]%>%###was this question askedf in
 fix_splits[["Q701C_4"]]=fix_splits[["Q701C_4"]]%>%###was this question askedin palestine?? 
   filter(country%nin%c(22, 15))
 
-fix_splits$Q701C_4%>%
-  group_by(mode, country, splita)%>%
-  summarise(Q701C_2=n())
+fix_splits$Q701C_2
 
 
 sum(map_dbl(fix_splits, nrow))
 
 
 write_csv(as.data.frame(fix_splits["Q201B_12"]), path = "Q201B_12_NAS.csv")
+
+abv_en%>%
+  filter(country==15)%>%
+  filter(Q701C_5%nin%c(NA) | Q701C_6%nin%c(NA))%>%
+  group_by(splita, mode)%>%
+  select(Q701C_5,Q701C_6, splita, mode)%>%
+  summarise_at(vars(starts_with("Q701C")), list(~n()))
+
+
+kuwait_data  = read_dta("/Volumes/GoogleDrive/Shared drives/Arab Barometer/AB5/Data/Kuwait/Complete Data Set/ABV_Kuwait_FINAL_RAW.dta")

@@ -100,8 +100,9 @@ long_subtitle_function= function (variable){
 }
 
 subtitle_function= function (variable){
-  title = c(labeling[[variable]])
-  paste(title[3],sep="\n",collapse = "\n")
+  title = c(Subtitles_Frame[[variable]])
+  title = paste("% saying ", title, sep = "")
+  
 }
 
 
@@ -174,17 +175,22 @@ colored_bar_plot = function(data, x, y, title){
 
 
 
-plotterizer = function(dataframe, x, fill = NA, pallette=NA){
+plotterizer = function(dataframe, x, y, fill = NA, pallette=NA){
+  dataframe = select(dataframe,starts_with(x), starts_with(y))%>%
+                       filter_at(vars(starts_with(x)), any_vars(.%nin%c(0,NA, NaN)))%>%
+    filter_at(vars(starts_with(x)), any_vars(.<1))
+
   fill=dataframe[[fill]]
   legend_title=names(dataframe)[[2]]
   title1 = title_function(x)
   subtitle = subtitle_function(x)
   variable = dataframe[[x]]
+  y= dataframe[[y]]
   if(length(fill)==0){
-    plot=ggplot(dataframe, aes(reorder(Country,variable), round(variable*100), fill=fill))+
+    plot=ggplot(dataframe, aes(reorder(y,variable), variable*100, fill=fill))+
       geom_bar(stat = "identity",position = position_dodge(width = 1), width = .8, fill=country_color)
   }else{
-    plot=ggplot(dataframe, aes(reorder(Country,variable), round(variable*100), fill=fill))+
+    plot=ggplot(dataframe, aes(reorder(y,variable), variable*100, fill=fill))+
       geom_bar(stat = "identity",position = position_dodge(width = 1), width = .8)
   }
   plot=plot+
