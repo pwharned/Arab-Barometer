@@ -1,0 +1,15 @@
+\documentclass{article}
+
+\begin{document}
+
+<<>>=
+source('~/Documents/Arab-Barometer/Wraps/Functions.R')
+
+abv_en%>%
+  group_by(country)%>%
+  summarise(mean(Q101))
+@
+
+
+
+\end{document}

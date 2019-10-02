@@ -1,6 +1,10 @@
 
 
 source("/Users/pharned/Documents/Arab-Barometer/Wraps/Functions.R")
+
+
+for(i in c("expss", "haven","readxl","tidyverse","ggrepel")){library(i,character.only = TRUE)}
+
 abv= abv_en
 
 ## we have christians coded as muslims
@@ -414,7 +418,8 @@ abv = abv%>%
   #set_names(walk(split_listA_is_TWO, paste))
 
   
-abv = restore_labels(abv)  
+abv = restore_labels(abv) 
+
 write_dta(abv, path = "/Volumes/GoogleDrive/Shared drives/Arab Barometer/AB5/Data/Release Data/September_16_Update.dta")
 
-
+read_dta("/Volumes/GoogleDrive/Shared drives/Arab Barometer/AB5/Data/Release Data/September_16_Update.dta")

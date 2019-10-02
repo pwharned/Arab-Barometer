@@ -17,8 +17,7 @@ source("/Users/pharned/Google Drive/Coding/R Projects/Arab-Barometer-Wraps/Funct
 ```{r pressure, echo=FALSE}
 abv=abv_en
 democracy_list=find_variable("democracy", abv)
-abv=recode_country(abv)%>%
-  mutate(Age= ifelse(Q1001%in%c(18:29),"18-29"))
+abv=recode_country(abv)
 
 labs_to_recode = c("strongly", "statement", "suitable", "dictatorship")
 recode_values = list(c(1,2), c(4), c(6:10), c(6:10))
@@ -53,7 +52,7 @@ abv_plot = function(dataframe, x, y){
 }
 
 democracy_plot = abv_plot(democracy_table, Label, Percent)
-plotterizer(democracy_table, label)
+
 
 ```
 
